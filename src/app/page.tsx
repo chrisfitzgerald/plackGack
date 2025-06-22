@@ -20,6 +20,7 @@ interface PlackGackGameProps {
   mode: GameMode;
   onExit: () => void;
   onSaveBalance?: (balance: number) => void;
+  isMobile?: boolean;
 }
 
 interface LeaderboardEntry {
@@ -88,7 +89,7 @@ function canDoubleDown(hand: { value: string; suit: string }[]) {
   return hand.length === 2 && getHandValue(hand) >= 9 && getHandValue(hand) <= 11;
 }
 
-function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance }: PlackGackGameProps) {
+function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, isMobile }: PlackGackGameProps & { isMobile?: boolean }) {
   // Game state
   const [deck, setDeck] = useState(createDeck());
   const [playerHands, setPlayerHands] = useState<{ value: string; suit: string }[][]>([]);
@@ -414,7 +415,7 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance }:
           setShowLeaderboard(!showLeaderboard);
         }}
       >
-        {showLeaderboard ? 'Hide' : 'Show'} Leaderboard
+        {isMobile ? (showLeaderboard ? 'Hide' : 'Leaderboard') : (showLeaderboard ? 'Hide' : 'Show') + ' Leaderboard'}
       </button>
       
       <button className={styles.logoutBtn} onClick={() => {
@@ -424,7 +425,7 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance }:
         }
         onExit();
       }}>
-        [ Exit to Main Menu ]
+        {isMobile ? 'Exit' : '[ Exit to Main Menu ]'}
       </button>
 
       {/* Faded game history log */}
@@ -717,7 +718,7 @@ export default function Home() {
   };
 
   if (offlineMode) {
-    return <PlackGackGame mode="offline" onExit={() => setOfflineMode(false)} />;
+    return <PlackGackGame mode="offline" onExit={() => setOfflineMode(false)} isMobile={isMobile} />;
   }
 
   if (onlineMode && session?.user) {
@@ -728,6 +729,7 @@ export default function Home() {
         persistentBalance={userCurrentBalance}
         onExit={() => setOnlineMode(false)}
         onSaveBalance={handleSaveBalance}
+        isMobile={isMobile}
       />
     );
   }
