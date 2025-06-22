@@ -692,7 +692,7 @@ export default function Home() {
           src="/title-mobile.png.png"
           alt="Game Title"
           className="ascii-art-mobile"
-          style={{ width: '100%', height: 'auto', display: 'none' }}
+          style={{ width: '100%', height: 'auto' }}
         />
       </div>
       
