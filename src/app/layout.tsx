@@ -4,7 +4,7 @@ import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "Play Plack Gack",
-  description: "A retro-style plack gack game with authentication and leaderboards",
+  description: "A retro-style black jack game with and get to the top of the leaderboard",
   icons: {
     icon: '/favicon.svg',
   },
