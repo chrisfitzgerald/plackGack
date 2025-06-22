@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { PrismaClient } from '../../../../generated/prisma';
+import prisma from '@/prisma';
 import { authOptions } from '../../auth/[...nextauth]/route';
-
-const prisma = new PrismaClient();
 
 // GET /api/user/score - Get current user's balance
 export async function GET() {
@@ -24,8 +22,15 @@ export async function GET() {
       },
     });
 
+    // Also fetch the user's username
+    const user = await prisma.user.findUnique({
+      where: { id: (session.user as any).id },
+      select: { username: true },
+    });
+
     const result = { 
-      currentBalance: userScore?.balance || 100 // Default to 100 if no previous games
+      currentBalance: userScore?.balance || 100, // Default to 100 if no previous games
+      user: { username: user?.username }
     };
 
     console.log('User balance fetched:', result);

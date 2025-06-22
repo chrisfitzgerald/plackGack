@@ -29,6 +29,7 @@ interface LeaderboardEntry {
   user: {
     name: string;
     image?: string;
+    username?: string;
   };
 }
 
@@ -540,7 +541,7 @@ ${playerHands.length > 1 ? `Hand ${currentHandIndex + 1}: ` : 'You:    '}${handT
             leaderboardData.map((entry, index) => (
               <div key={entry.id} className={styles.leaderboardSlideEntry}>
                 <span className={styles.rank}>#{index + 1}</span>
-                <span className={styles.playerName}>{entry.user.name}</span>
+                <span className={styles.playerName}>{entry.user.username || entry.user.name}</span>
                 <span className={styles.balance}>${entry.balance}</span>
               </div>
             ))
@@ -563,7 +564,7 @@ function Leaderboard({ entries }: { entries: LeaderboardEntry[] }) {
         {entries.map((entry, index) => (
           <div key={entry.id} className={styles.leaderboardEntry}>
             <span className={styles.rank}>#{index + 1}</span>
-            <span className={styles.playerName}>{entry.user.name}</span>
+            <span className={styles.playerName}>{entry.user.username || entry.user.name}</span>
             <span className={styles.balance}>${entry.balance}</span>
           </div>
         ))}
