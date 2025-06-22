@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import { authOptions } from '../../auth/[...nextauth]/route';
-import prisma from '@/generated/prisma';
+import prisma from '@/prisma';
 
 // POST: Set username if unique
 export async function POST(req: Request) {
