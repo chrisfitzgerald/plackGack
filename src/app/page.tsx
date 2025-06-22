@@ -578,6 +578,17 @@ export default function Home() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [userCurrentBalance, setUserCurrentBalance] = useState(100);
   const [loading, setLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Function to check if the device is mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 600);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Fetch leaderboard
   useEffect(() => {
@@ -678,8 +689,18 @@ export default function Home() {
 
   return (
     <div className={styles.terminalBg}>
-      <div className="ascii-art-container">
-        <pre className={styles.terminalText + ' ascii-art-desktop'}>
+      <div className="ascii-art-container" style={{ width: '100vw', maxWidth: '100vw', overflow: 'hidden', justifyContent: 'center', display: 'flex' }}>
+        {isMobile ? (
+          <img
+            src="/title-mobile.png.png"
+            alt="Game Title"
+            style={{ maxWidth: '100vw', width: '100%', height: 'auto', display: 'block', margin: '0 auto' }}
+          />
+        ) : (
+          <pre
+            className={styles.terminalText}
+            style={{ fontSize: 'clamp(0.7rem, 2vw, 1.1rem)', width: '100%', overflowX: 'auto', textAlign: 'center', margin: 0 }}
+          >
 {`██████╗ ██╗      █████╗  ██████╗██╗  ██╗     ██████╗  █████╗  ██████╗██╗  ██╗
 ██╔══██╗██║     ██╔══██╗██╔════╝██║ ██╔╝    ██╔════╝ ██╔══██╗██╔════╝██║ ██╔╝
 ██████╔╝██║     ███████║██║     █████╔╝     ██║  ███╗███████║██║     █████╔╝ 
@@ -687,13 +708,8 @@ export default function Home() {
 ██║     ███████╗██║  ██║╚██████╗██║  ██╗    ╚██████╔╝██║  ██║╚██████╗██║  ██╗
 ╚═╝     ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝     ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
 `}
-        </pre>
-        <img
-          src="/title-mobile.png.png"
-          alt="Game Title"
-          className="ascii-art-mobile"
-          style={{ width: '100%', height: 'auto' }}
-        />
+          </pre>
+        )}
       </div>
       
       {session?.user ? (
