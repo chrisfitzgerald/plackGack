@@ -176,6 +176,13 @@ a.secondary {
   justify-content: center;
 }
 
+.ascii-art-container {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+
 .terminalText {
   color: #39ff14;
   font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
@@ -184,7 +191,7 @@ a.secondary {
   white-space: pre;
   text-shadow: 0 0 4px #39ff14, 0 0 2px #39ff14;
   width: 100%;
-  display: block;
+  display: inline-block;
   text-align: center;
   box-sizing: border-box;
 }
@@ -197,8 +204,9 @@ a.secondary {
 
 @media (max-width: 600px) {
   .terminalText {
-    font-size: min(3vw, 14px);
-    padding-bottom: 0.5rem;
+    font-size: 12px;
+    transform: scale(calc(100vw / 700)); /* 700px is approx. ASCII art width */
+    transform-origin: left top;
   }
 }
 

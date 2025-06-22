@@ -678,7 +678,8 @@ export default function Home() {
 
   return (
     <div className={styles.terminalBg}>
-      <pre className={styles.terminalText}>
+      <div className="ascii-art-container">
+        <pre className={styles.terminalText}>
 {`██████╗ ██╗      █████╗  ██████╗██╗  ██╗     ██████╗  █████╗  ██████╗██╗  ██╗
 ██╔══██╗██║     ██╔══██╗██╔════╝██║ ██╔╝    ██╔════╝ ██╔══██╗██╔════╝██║ ██╔╝
 ██████╔╝██║     ███████║██║     █████╔╝     ██║  ███╗███████║██║     █████╔╝ 
@@ -686,7 +687,8 @@ export default function Home() {
 ██║     ███████╗██║  ██║╚██████╗██║  ██╗    ╚██████╔╝██║  ██║╚██████╗██║  ██╗
 ╚═╝     ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝     ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
 `}
-      </pre>
+        </pre>
+      </div>
       
       {session?.user ? (
         <div className={styles.userInfo}>
