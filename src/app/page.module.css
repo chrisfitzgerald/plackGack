@@ -183,6 +183,18 @@ a.secondary {
   margin-bottom: 1.5rem;
   white-space: pre;
   text-shadow: 0 0 4px #39ff14, 0 0 2px #39ff14;
+  overflow-x: auto;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .terminalText {
+    font-size: 3.5vw;
+    padding-bottom: 0.5rem;
+    max-width: 100vw;
+    overflow-x: auto;
+  }
 }
 
 .terminalPrompt {
