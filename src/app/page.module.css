@@ -661,3 +661,19 @@ a.secondary {
 .leaderboardSlideList::-webkit-scrollbar-thumb:hover {
   background: rgba(57, 255, 20, 0.6);
 }
+
+.ascii-art-mobile {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .ascii-art-desktop {
+    display: none !important;
+  }
+  .ascii-art-mobile {
+    display: block !important;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+  }
+}

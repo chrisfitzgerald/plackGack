@@ -679,7 +679,7 @@ export default function Home() {
   return (
     <div className={styles.terminalBg}>
       <div className="ascii-art-container">
-        <pre className={styles.terminalText}>
+        <pre className={styles.terminalText + ' ascii-art-desktop'}>
 {`██████╗ ██╗      █████╗  ██████╗██╗  ██╗     ██████╗  █████╗  ██████╗██╗  ██╗
 ██╔══██╗██║     ██╔══██╗██╔════╝██║ ██╔╝    ██╔════╝ ██╔══██╗██╔════╝██║ ██╔╝
 ██████╔╝██║     ███████║██║     █████╔╝     ██║  ███╗███████║██║     █████╔╝ 
@@ -688,6 +688,12 @@ export default function Home() {
 ╚═╝     ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝     ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
 `}
         </pre>
+        <img
+          src="/title-mobile.png.png"
+          alt="Game Title"
+          className="ascii-art-mobile"
+          style={{ width: '100%', height: 'auto', display: 'none' }}
+        />
       </div>
       
       {session?.user ? (
