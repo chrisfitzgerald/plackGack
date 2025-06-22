@@ -3,7 +3,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "Vintage Plack Gack",
+  title: "Play Plack Gack",
   description: "A retro-style plack gack game with authentication and leaderboards",
   icons: {
     icon: '/spade.svg',

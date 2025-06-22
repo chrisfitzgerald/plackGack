@@ -197,7 +197,7 @@ a.secondary {
 
 @media (max-width: 600px) {
   .terminalText {
-    font-size: 3vw;
+    font-size: min(3vw, 14px);
     padding-bottom: 0.5rem;
   }
 }
