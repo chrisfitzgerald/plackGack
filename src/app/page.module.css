@@ -166,3 +166,473 @@ a.secondary {
     filter: invert();
   }
 }
+
+.terminalBg {
+  background: #181818;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.terminalText {
+  color: #39ff14;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  white-space: pre;
+  text-shadow: 0 0 4px #39ff14, 0 0 2px #39ff14;
+}
+
+.terminalPrompt {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+
+.terminalPrompt span {
+  color: #39ff14;
+  font-family: inherit;
+  font-size: 1.2rem;
+  margin-right: 0.5rem;
+}
+
+.signInBtn {
+  background: #181818;
+  color: #39ff14;
+  border: 1.5px solid #39ff14;
+  font-family: inherit;
+  font-size: 1.1rem;
+  padding: 0.4rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 0 8px #39ff1440;
+}
+
+.signInBtn:hover {
+  background: #39ff14;
+  color: #181818;
+}
+
+.terminalInfo {
+  color: #b2ffb2;
+  font-family: inherit;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+  text-shadow: 0 0 2px #39ff14;
+}
+
+.offlineBtn {
+  background: #181818;
+  color: #39ff14;
+  border: 1.5px dashed #39ff14;
+  font-family: inherit;
+  font-size: 1.1rem;
+  padding: 0.4rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 1rem;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 0 8px #39ff1440;
+}
+
+.offlineBtn:hover {
+  background: #39ff14;
+  color: #181818;
+}
+
+.gameContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100vw;
+  background: #181818;
+}
+
+.offlineInfo {
+  position: fixed;
+  left: 50%;
+  bottom: 2rem;
+  transform: translateX(-50%);
+  color: #39ff14;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  font-size: 1.1rem;
+  text-align: center;
+  z-index: 10;
+}
+
+.gameHistory {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.13;
+  color: #39ff14;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  font-size: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 2rem 2rem 5rem 2rem;
+  white-space: pre-wrap;
+  user-select: none;
+  text-shadow: 0 0 4px #39ff14, 0 0 2px #39ff14;
+}
+
+.logoutBtn {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 20;
+  background: #181818;
+  color: #ff4136;
+  border: 1.5px dashed #ff4136;
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.4rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 0 8px #ff413640;
+}
+
+.logoutBtn:hover {
+  background: #ff4136;
+  color: #181818;
+}
+
+.gameHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 1rem 0.5rem;
+  gap: 1rem;
+  position: relative;
+  z-index: 20;
+}
+
+.leaderboardBtn {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  z-index: 20;
+  background: transparent;
+  border: 1px solid #39ff14;
+  color: #39ff14;
+  padding: 0.4rem 0.8rem;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.leaderboardBtn:hover {
+  background: rgba(57, 255, 20, 0.2);
+  box-shadow: 0 0 8px rgba(57, 255, 20, 0.4);
+}
+
+/* Old modal overlay styles removed - now using collapsible panel */
+
+.bettingInterface {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.betControls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.betControls button {
+  background: #181818;
+  color: #39ff14;
+  border: 1.5px solid #39ff14;
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 0 8px #39ff1440;
+}
+
+.betControls button:hover:not(:disabled) {
+  background: #39ff14;
+  color: #181818;
+}
+
+.betControls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.leaderboard {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: rgba(57, 255, 20, 0.05);
+  border: 1px solid rgba(57, 255, 20, 0.2);
+  border-radius: 8px;
+  max-width: 600px;
+  width: 100%;
+}
+
+.leaderboard h2 {
+  color: #39ff14;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  font-size: 1.3rem;
+  margin: 0 0 1rem 0;
+  text-align: center;
+  text-shadow: 0 0 4px #39ff14;
+}
+
+.leaderboardList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.leaderboardEntry {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.5rem;
+  background: rgba(57, 255, 20, 0.03);
+  border-radius: 4px;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  font-size: 0.9rem;
+}
+
+.rank {
+  color: #39ff14;
+  font-weight: bold;
+  min-width: 2rem;
+}
+
+.playerName {
+  color: #b2ffb2;
+  font-weight: bold;
+}
+
+.balance {
+  color: #39ff14;
+  font-weight: bold;
+  text-align: right;
+}
+
+@media (max-width: 600px) {
+  .leaderboardEntry {
+    grid-template-columns: auto 1fr auto;
+    gap: 0.5rem;
+  }
+}
+
+.leaderboardPanel {
+  background: rgba(24, 24, 24, 0.95);
+  border: 1px solid #39ff14;
+  border-radius: 8px;
+  margin: 1rem 0;
+  padding: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+}
+
+.leaderboardPanel .leaderboardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #39ff14;
+  padding-bottom: 0.5rem;
+}
+
+.leaderboardPanel .leaderboardHeader h3 {
+  color: #39ff14;
+  margin: 0;
+  font-size: 1.1rem;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+}
+
+.leaderboardPanel .leaderboardList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.leaderboardPanel .leaderboardEntry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: rgba(57, 255, 20, 0.1);
+  border-radius: 4px;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  font-size: 0.9rem;
+}
+
+.leaderboardPanel .rank {
+  color: #39ff14;
+  font-weight: bold;
+  min-width: 40px;
+}
+
+.leaderboardPanel .playerName {
+  color: #39ff14;
+  flex: 1;
+  margin: 0 1rem;
+}
+
+.leaderboardPanel .balance {
+  color: #39ff14;
+  font-weight: bold;
+  min-width: 60px;
+  text-align: right;
+}
+
+/* Sliding Leaderboard Styles */
+.leaderboardSlide {
+  position: fixed;
+  bottom: -400px;
+  left: 0;
+  right: 0;
+  height: 400px;
+  background: rgba(24, 24, 24, 0.98);
+  border-top: 2px solid #39ff14;
+  border-radius: 12px 12px 0 0;
+  z-index: 100;
+  transition: bottom 0.3s ease-in-out;
+  box-shadow: 0 -4px 20px rgba(57, 255, 20, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.leaderboardSlideOpen {
+  bottom: 0;
+}
+
+.leaderboardSlideHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(57, 255, 20, 0.3);
+  background: rgba(57, 255, 20, 0.05);
+  border-radius: 12px 12px 0 0;
+}
+
+.leaderboardSlideHeader h3 {
+  color: #39ff14;
+  margin: 0;
+  font-size: 1.2rem;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  text-shadow: 0 0 4px #39ff14;
+}
+
+.leaderboardCloseBtn {
+  background: transparent;
+  border: 1px solid #39ff14;
+  color: #39ff14;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.leaderboardCloseBtn:hover {
+  background: rgba(57, 255, 20, 0.2);
+  box-shadow: 0 0 8px rgba(57, 255, 20, 0.4);
+}
+
+.leaderboardSlideList {
+  padding: 1rem;
+  height: calc(400px - 80px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.leaderboardSlideEntry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: rgba(57, 255, 20, 0.08);
+  border-radius: 6px;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  font-size: 0.95rem;
+  border: 1px solid rgba(57, 255, 20, 0.2);
+  transition: all 0.2s ease;
+}
+
+.leaderboardSlideEntry:hover {
+  background: rgba(57, 255, 20, 0.15);
+  border-color: rgba(57, 255, 20, 0.4);
+}
+
+.leaderboardSlideEntry .rank {
+  color: #39ff14;
+  font-weight: bold;
+  min-width: 50px;
+  text-align: center;
+}
+
+.leaderboardSlideEntry .playerName {
+  color: #39ff14;
+  flex: 1;
+  margin: 0 1rem;
+  text-align: left;
+}
+
+.leaderboardSlideEntry .balance {
+  color: #39ff14;
+  font-weight: bold;
+  min-width: 80px;
+  text-align: right;
+}
+
+/* Scrollbar styling for the leaderboard */
+.leaderboardSlideList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.leaderboardSlideList::-webkit-scrollbar-track {
+  background: rgba(57, 255, 20, 0.1);
+  border-radius: 3px;
+}
+
+.leaderboardSlideList::-webkit-scrollbar-thumb {
+  background: rgba(57, 255, 20, 0.4);
+  border-radius: 3px;
+}
+
+.leaderboardSlideList::-webkit-scrollbar-thumb:hover {
+  background: rgba(57, 255, 20, 0.6);
+}

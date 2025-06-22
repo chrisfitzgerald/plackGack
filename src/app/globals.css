@@ -1,12 +1,22 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #181818;
+  --foreground: #39ff14;
+  --terminal-green: #39ff14;
+  --terminal-green-glow: #39ff14;
+  --terminal-red: #ff4136;
+  --terminal-red-glow: #ff4136;
+  --terminal-bg: #181818;
+  --terminal-text: #39ff14;
+  --terminal-border: #39ff14;
+  --terminal-hover: rgba(57, 255, 20, 0.2);
+  --terminal-shadow: rgba(57, 255, 20, 0.4);
+  --player-name: #b2ffb2;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #181818;
+    --foreground: #39ff14;
   }
 }
 
@@ -19,9 +29,10 @@ body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-shadow: 0 0 2px var(--terminal-green-glow);
 }
 
 * {
@@ -33,6 +44,56 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* Hide Next.js branding */
+[data-nextjs-data-router-tree]::after,
+[data-nextjs-data-router-tree]::before {
+  display: none !important;
+}
+
+/* Hide any Next.js logo or branding */
+[data-nextjs-toast-root] {
+  display: none !important;
+}
+
+/* Hide any footer with Next.js branding */
+footer[data-nextjs-footer],
+div[data-nextjs-footer] {
+  display: none !important;
+}
+
+/* Hide any elements with Next.js branding */
+[data-nextjs-branding],
+.nextjs-branding {
+  display: none !important;
+}
+
+/* Hide the nextjs-portal element that contains the Next.js logo */
+nextjs-portal {
+  display: none !important;
+}
+
+/* Hide any logos in the bottom left corner */
+body > div:last-child img[src*="next"],
+body > div:last-child img[src*="vercel"],
+body > footer img[src*="next"],
+body > footer img[src*="vercel"] {
+  display: none !important;
+}
+
+/* Hide any fixed positioned elements in bottom left */
+body > div[style*="position: fixed"][style*="bottom"][style*="left"],
+body > div[style*="position:fixed"][style*="bottom"][style*="left"] {
+  display: none !important;
+}
+
+/* Hide any elements with Next.js related classes or IDs */
+#__next > div:last-child:not([class*="game"]),
+#__next > footer,
+.nextjs-footer,
+.vercel-footer {
+  display: none !important;
 }
 
 @media (prefers-color-scheme: dark) {
