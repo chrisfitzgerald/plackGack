@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Play Plack Gack",
   description: "A retro-style plack gack game with authentication and leaderboards",
   icons: {
-    icon: '/spade.svg',
+    icon: '/favicon.svg',
   },
 };
 
