@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import styles from "./page.module.css";
+import React from 'react';
 
 // Types for future extensibility
 interface User {
@@ -579,6 +580,11 @@ export default function Home() {
   const [userCurrentBalance, setUserCurrentBalance] = useState(100);
   const [loading, setLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showUsernameModal, setShowUsernameModal] = useState(false);
+  const [usernameInput, setUsernameInput] = useState('');
+  const [usernameError, setUsernameError] = useState('');
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
 
   useEffect(() => {
     // Function to check if the device is mobile
@@ -626,6 +632,25 @@ export default function Home() {
     fetchUserBalance();
   }, [session]);
 
+  // Fetch user profile after login
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (session?.user?.email) {
+        const res = await fetch('/api/user/score');
+        if (res.ok) {
+          const data = await res.json();
+          setUserProfile(data.user || {});
+          if (!data.user?.username) {
+            setShowUsernameModal(true);
+          }
+        }
+      }
+    };
+    if (session?.user) {
+      fetchProfile();
+    }
+  }, [session]);
+
   const handleSaveBalance = async (balance: number) => {
     if (!session?.user) return;
     
@@ -661,6 +686,33 @@ export default function Home() {
     await signOut();
     setOnlineMode(false);
     setLoading(false);
+  };
+
+  // Username modal submit handler
+  const handleUsernameSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUsernameError('');
+    setCheckingUsername(true);
+    const username = usernameInput.trim();
+    if (!username || username.length < 3) {
+      setUsernameError('Username must be at least 3 characters.');
+      setCheckingUsername(false);
+      return;
+    }
+    // Check and set username via API
+    const res = await fetch('/api/user/username', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username }),
+    });
+    if (res.ok) {
+      setShowUsernameModal(false);
+      setUserProfile((u: any) => ({ ...u, username }));
+    } else {
+      const data = await res.json();
+      setUsernameError(data.error || 'Unknown error');
+    }
+    setCheckingUsername(false);
   };
 
   if (offlineMode) {
@@ -746,6 +798,29 @@ export default function Home() {
 
       {leaderboard.length > 0 && (
         <Leaderboard entries={leaderboard} />
+      )}
+
+      {/* Username Modal */}
+      {showUsernameModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', color: '#39ff14', fontFamily: 'Fira Mono, Consolas, Menlo, monospace',
+        }}>
+          <form onSubmit={handleUsernameSubmit} style={{ background: '#222', padding: 32, borderRadius: 12, boxShadow: '0 0 16px #39ff14', minWidth: 300, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <h2 style={{ marginBottom: 16 }}>Choose a Username</h2>
+            <input
+              type="text"
+              value={usernameInput}
+              onChange={e => setUsernameInput(e.target.value)}
+              style={{ padding: 8, fontSize: 18, borderRadius: 6, border: '1px solid #39ff14', marginBottom: 12, width: '100%' }}
+              disabled={checkingUsername}
+              autoFocus
+            />
+            {usernameError && <div style={{ color: '#ff3939', marginBottom: 8 }}>{usernameError}</div>}
+            <button type="submit" style={{ background: '#39ff14', color: '#222', fontWeight: 'bold', border: 'none', borderRadius: 6, padding: '8px 24px', fontSize: 18, cursor: 'pointer' }} disabled={checkingUsername}>
+              {checkingUsername ? 'Checking...' : 'Set Username'}
+            </button>
+          </form>
+        </div>
       )}
     </div>
   );
