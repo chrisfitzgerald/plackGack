@@ -160,6 +160,11 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, i
     }
   }, [mode, onSaveBalance, balance]);
 
+  // Helper function to check if user has enough funds for actions
+  function hasEnoughFundsForAction(action: 'double' | 'split'): boolean {
+    return balance >= currentBet;
+  }
+
   // Betting functions
   function adjustBet(amount: number) {
     const newBet = Math.max(5, Math.min(balance, currentBet + amount));
@@ -180,9 +185,12 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, i
       setGameOver(true);
       return;
     }
+    
+    // Check if deck needs to be reshuffled (when less than 15 cards remain)
     const newDeck = deck.length < 15 ? createDeck() : [...deck];
     const player = [newDeck.pop()!, newDeck.pop()!];
     const dealer = [newDeck.pop()!, newDeck.pop()!];
+    
     setDeck(newDeck);
     setPlayerHands([player]);
     setDealerHand(dealer);
@@ -196,7 +204,7 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, i
     setGameOver(false);
     setBalance(b => b - currentBet);
 
-    // Check for plack gack
+    // Check for plack gack (blackjack)
     if (isPlackGack(player)) {
       setTimeout(() => {
         endRound('plackgack');
@@ -207,10 +215,21 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, i
   // Player actions
   function hit() {
     if (!inRound || !playerTurn || gamePhase !== 'playing') return;
+    
     const newDeck = [...deck];
     const newHands = [...playerHands];
-    newHands[currentHandIndex] = [...newHands[currentHandIndex], newDeck.pop()!];
-    setDeck(newDeck);
+    
+    // Ensure we have cards to deal
+    if (newDeck.length === 0) {
+      setMessage('No cards left in deck! Reshuffling...');
+      const reshuffledDeck = createDeck();
+      newHands[currentHandIndex] = [...newHands[currentHandIndex], reshuffledDeck.pop()!];
+      setDeck(reshuffledDeck);
+    } else {
+      newHands[currentHandIndex] = [...newHands[currentHandIndex], newDeck.pop()!];
+      setDeck(newDeck);
+    }
+    
     setPlayerHands(newHands);
     
     if (getHandValue(newHands[currentHandIndex]) > 21) {
@@ -252,7 +271,7 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, i
 
   function doubleDown() {
     if (!inRound || !playerTurn || gamePhase !== 'playing' || !canDoubleDown(playerHand)) return;
-    if (balance < currentBet) {
+    if (!hasEnoughFundsForAction('double')) {
       setMessage('Not enough funds to double down!');
       return;
     }
@@ -262,7 +281,7 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, i
     newHands[currentHandIndex] = [...newHands[currentHandIndex], newDeck.pop()!];
     setDeck(newDeck);
     setPlayerHands(newHands);
-    setBalance(b => b - currentBet); // Additional bet for double down
+    // Don't deduct balance again - it was already deducted in startRound()
     setDoubledDownHands(prev => new Set([...prev, currentHandIndex]));
     
     if (getHandValue(newHands[currentHandIndex]) > 21) {
@@ -299,7 +318,7 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, i
 
   function split() {
     if (!inRound || !playerTurn || gamePhase !== 'playing' || !canSplit(playerHand)) return;
-    if (balance < currentBet) {
+    if (!hasEnoughFundsForAction('split')) {
       setMessage('Not enough funds to split!');
       return;
     }
@@ -318,7 +337,8 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, i
     
     setDeck(newDeck);
     setPlayerHands(newHands);
-    setBalance(b => b - currentBet); // Additional bet for split
+    // Deduct additional bet for the split hand
+    setBalance(b => b - currentBet);
     setCurrentHandIndex(currentHandIndex);
   }
 
@@ -333,7 +353,7 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, i
     let totalPayout = 0;
     
     if (reason === 'plackgack') {
-      // Plack Gack pays 3:2
+      // Plack Gack (Blackjack) pays 3:2
       const winnings = Math.floor(currentBet * 1.5);
       const totalPayout = winnings + currentBet;
       resultMsg = `Plack Gack! You win $${winnings} + your $${currentBet} bet back = $${totalPayout}!`;
@@ -344,6 +364,7 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, i
       // Calculate results for each hand
       const results = playerHands.map((hand, index) => {
         const playerValue = getHandValue(hand);
+        // For double down hands, the bet amount is doubled
         const betAmount = doubledDownHands.has(index) ? currentBet * 2 : currentBet;
         let handMsg = '';
         let handPayout = 0;
@@ -470,19 +491,19 @@ ${playerHands.length > 1 ? `Hand ${currentHandIndex + 1}: ` : 'You:    '}${handT
               Stand
             </button>
             {canDoubleDown(playerHand) && (
-              <button className={styles.offlineBtn} onClick={doubleDown} disabled={!playerTurn || gamePhase !== 'playing' || balance < currentBet}>
+              <button className={styles.offlineBtn} onClick={doubleDown} disabled={!playerTurn || gamePhase !== 'playing' || !hasEnoughFundsForAction('double')}>
                 Double
               </button>
             )}
             {canSplit(playerHand) && (
-              <button className={styles.offlineBtn} onClick={split} disabled={!playerTurn || gamePhase !== 'playing' || balance < currentBet}>
+              <button className={styles.offlineBtn} onClick={split} disabled={!playerTurn || gamePhase !== 'playing' || !hasEnoughFundsForAction('split')}>
                 Split
               </button>
             )}
           </>
         ) : (
           <>
-            <button className={styles.signInBtn} onClick={startRound} disabled={balance < currentBet}>
+            <button className={styles.signInBtn} onClick={startRound} disabled={balance < currentBet || gameOver}>
               Deal
             </button>
           </>
@@ -502,13 +523,13 @@ ${playerHands.length > 1 ? `Hand ${currentHandIndex + 1}: ` : 'You:    '}${handT
             <button className={styles.signInBtn} onClick={() => adjustBet(-1)} disabled={currentBet <= 5}>
               -$1
             </button>
-            <button className={styles.signInBtn} onClick={() => setBet(10)}>
+            <button className={styles.signInBtn} onClick={() => setBet(10)} disabled={balance < 10}>
               $10
             </button>
-            <button className={styles.signInBtn} onClick={() => setBet(25)}>
+            <button className={styles.signInBtn} onClick={() => setBet(25)} disabled={balance < 25}>
               $25
             </button>
-            <button className={styles.signInBtn} onClick={() => setBet(50)}>
+            <button className={styles.signInBtn} onClick={() => setBet(50)} disabled={balance < 50}>
               $50
             </button>
             <button className={styles.signInBtn} onClick={() => adjustBet(1)} disabled={currentBet >= balance}>
