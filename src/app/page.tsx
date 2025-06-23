@@ -471,9 +471,10 @@ ${playerHands.length > 1 ? `Hand ${currentHandIndex + 1}: ` : 'You:    '}${handT
         </pre>
       )}
       
-      {message && (
-        <pre className={styles.terminalText}>{message}</pre>
-      )}
+      {/* Dedicated message area with fixed height to prevent layout shifts */}
+      <div className={`${styles.gameMessage} ${message ? styles.hasMessage : ''}`}>
+        {message || '\n'}
+      </div>
       
       {gameOver && (
         <pre className={styles.terminalText}>
