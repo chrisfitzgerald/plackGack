@@ -458,6 +458,11 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, i
         </div>
       )}
       
+      {/* Dedicated message area with fixed height to prevent layout shifts */}
+      <div className={`${styles.gameMessage} ${message ? styles.hasMessage : ''}`}>
+        {message || '\n'}
+      </div>
+      
       <pre className={styles.terminalText}>
         {mode === 'offline'
           ? `${inRound ? '' : '\nPress [Deal] to start a new round.'}`
@@ -470,11 +475,6 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, i
 ${playerHands.length > 1 ? `Hand ${currentHandIndex + 1}: ` : 'You:    '}${handToString(playerHand)} (${getHandValue(playerHand)})${playerHands.length > 1 ? ` [${playerHands.length} hands]` : ''}${doubledDownHands.has(currentHandIndex) ? ' [DOUBLE]' : ''}`}
         </pre>
       )}
-      
-      {/* Dedicated message area with fixed height to prevent layout shifts */}
-      <div className={`${styles.gameMessage} ${message ? styles.hasMessage : ''}`}>
-        {message || '\n'}
-      </div>
       
       {gameOver && (
         <pre className={styles.terminalText}>
