@@ -5322,10 +5322,28 @@ export namespace Prisma {
 
   export type GameScoreAvgAggregateOutputType = {
     balance: number | null
+    totalHands: number | null
+    wins: number | null
+    losses: number | null
+    pushes: number | null
+    blackjacks: number | null
+    bestWinStreak: number | null
+    bestLossStreak: number | null
+    totalBet: number | null
+    fiveCardCharlies: number | null
   }
 
   export type GameScoreSumAggregateOutputType = {
     balance: number | null
+    totalHands: number | null
+    wins: number | null
+    losses: number | null
+    pushes: number | null
+    blackjacks: number | null
+    bestWinStreak: number | null
+    bestLossStreak: number | null
+    totalBet: number | null
+    fiveCardCharlies: number | null
   }
 
   export type GameScoreMinAggregateOutputType = {
@@ -5333,6 +5351,16 @@ export namespace Prisma {
     userId: string | null
     balance: number | null
     gameDate: Date | null
+    totalHands: number | null
+    wins: number | null
+    losses: number | null
+    pushes: number | null
+    blackjacks: number | null
+    bestWinStreak: number | null
+    bestLossStreak: number | null
+    totalBet: number | null
+    mostDrawnCard: string | null
+    fiveCardCharlies: number | null
   }
 
   export type GameScoreMaxAggregateOutputType = {
@@ -5340,6 +5368,16 @@ export namespace Prisma {
     userId: string | null
     balance: number | null
     gameDate: Date | null
+    totalHands: number | null
+    wins: number | null
+    losses: number | null
+    pushes: number | null
+    blackjacks: number | null
+    bestWinStreak: number | null
+    bestLossStreak: number | null
+    totalBet: number | null
+    mostDrawnCard: string | null
+    fiveCardCharlies: number | null
   }
 
   export type GameScoreCountAggregateOutputType = {
@@ -5347,16 +5385,44 @@ export namespace Prisma {
     userId: number
     balance: number
     gameDate: number
+    totalHands: number
+    wins: number
+    losses: number
+    pushes: number
+    blackjacks: number
+    bestWinStreak: number
+    bestLossStreak: number
+    totalBet: number
+    mostDrawnCard: number
+    fiveCardCharlies: number
     _all: number
   }
 
 
   export type GameScoreAvgAggregateInputType = {
     balance?: true
+    totalHands?: true
+    wins?: true
+    losses?: true
+    pushes?: true
+    blackjacks?: true
+    bestWinStreak?: true
+    bestLossStreak?: true
+    totalBet?: true
+    fiveCardCharlies?: true
   }
 
   export type GameScoreSumAggregateInputType = {
     balance?: true
+    totalHands?: true
+    wins?: true
+    losses?: true
+    pushes?: true
+    blackjacks?: true
+    bestWinStreak?: true
+    bestLossStreak?: true
+    totalBet?: true
+    fiveCardCharlies?: true
   }
 
   export type GameScoreMinAggregateInputType = {
@@ -5364,6 +5430,16 @@ export namespace Prisma {
     userId?: true
     balance?: true
     gameDate?: true
+    totalHands?: true
+    wins?: true
+    losses?: true
+    pushes?: true
+    blackjacks?: true
+    bestWinStreak?: true
+    bestLossStreak?: true
+    totalBet?: true
+    mostDrawnCard?: true
+    fiveCardCharlies?: true
   }
 
   export type GameScoreMaxAggregateInputType = {
@@ -5371,6 +5447,16 @@ export namespace Prisma {
     userId?: true
     balance?: true
     gameDate?: true
+    totalHands?: true
+    wins?: true
+    losses?: true
+    pushes?: true
+    blackjacks?: true
+    bestWinStreak?: true
+    bestLossStreak?: true
+    totalBet?: true
+    mostDrawnCard?: true
+    fiveCardCharlies?: true
   }
 
   export type GameScoreCountAggregateInputType = {
@@ -5378,6 +5464,16 @@ export namespace Prisma {
     userId?: true
     balance?: true
     gameDate?: true
+    totalHands?: true
+    wins?: true
+    losses?: true
+    pushes?: true
+    blackjacks?: true
+    bestWinStreak?: true
+    bestLossStreak?: true
+    totalBet?: true
+    mostDrawnCard?: true
+    fiveCardCharlies?: true
     _all?: true
   }
 
@@ -5472,6 +5568,16 @@ export namespace Prisma {
     userId: string
     balance: number
     gameDate: Date
+    totalHands: number
+    wins: number
+    losses: number
+    pushes: number
+    blackjacks: number
+    bestWinStreak: number
+    bestLossStreak: number
+    totalBet: number
+    mostDrawnCard: string
+    fiveCardCharlies: number
     _count: GameScoreCountAggregateOutputType | null
     _avg: GameScoreAvgAggregateOutputType | null
     _sum: GameScoreSumAggregateOutputType | null
@@ -5498,6 +5604,16 @@ export namespace Prisma {
     userId?: boolean
     balance?: boolean
     gameDate?: boolean
+    totalHands?: boolean
+    wins?: boolean
+    losses?: boolean
+    pushes?: boolean
+    blackjacks?: boolean
+    bestWinStreak?: boolean
+    bestLossStreak?: boolean
+    totalBet?: boolean
+    mostDrawnCard?: boolean
+    fiveCardCharlies?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["gameScore"]>
 
@@ -5508,9 +5624,19 @@ export namespace Prisma {
     userId?: boolean
     balance?: boolean
     gameDate?: boolean
+    totalHands?: boolean
+    wins?: boolean
+    losses?: boolean
+    pushes?: boolean
+    blackjacks?: boolean
+    bestWinStreak?: boolean
+    bestLossStreak?: boolean
+    totalBet?: boolean
+    mostDrawnCard?: boolean
+    fiveCardCharlies?: boolean
   }
 
-  export type GameScoreOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "balance" | "gameDate", ExtArgs["result"]["gameScore"]>
+  export type GameScoreOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "balance" | "gameDate" | "totalHands" | "wins" | "losses" | "pushes" | "blackjacks" | "bestWinStreak" | "bestLossStreak" | "totalBet" | "mostDrawnCard" | "fiveCardCharlies", ExtArgs["result"]["gameScore"]>
   export type GameScoreInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -5525,6 +5651,16 @@ export namespace Prisma {
       userId: string
       balance: number
       gameDate: Date
+      totalHands: number
+      wins: number
+      losses: number
+      pushes: number
+      blackjacks: number
+      bestWinStreak: number
+      bestLossStreak: number
+      totalBet: number
+      mostDrawnCard: string
+      fiveCardCharlies: number
     }, ExtArgs["result"]["gameScore"]>
     composites: {}
   }
@@ -5922,6 +6058,16 @@ export namespace Prisma {
     readonly userId: FieldRef<"GameScore", 'String'>
     readonly balance: FieldRef<"GameScore", 'Int'>
     readonly gameDate: FieldRef<"GameScore", 'DateTime'>
+    readonly totalHands: FieldRef<"GameScore", 'Int'>
+    readonly wins: FieldRef<"GameScore", 'Int'>
+    readonly losses: FieldRef<"GameScore", 'Int'>
+    readonly pushes: FieldRef<"GameScore", 'Int'>
+    readonly blackjacks: FieldRef<"GameScore", 'Int'>
+    readonly bestWinStreak: FieldRef<"GameScore", 'Int'>
+    readonly bestLossStreak: FieldRef<"GameScore", 'Int'>
+    readonly totalBet: FieldRef<"GameScore", 'Int'>
+    readonly mostDrawnCard: FieldRef<"GameScore", 'String'>
+    readonly fiveCardCharlies: FieldRef<"GameScore", 'Int'>
   }
     
 
@@ -6370,7 +6516,17 @@ export namespace Prisma {
     id: 'id',
     userId: 'userId',
     balance: 'balance',
-    gameDate: 'gameDate'
+    gameDate: 'gameDate',
+    totalHands: 'totalHands',
+    wins: 'wins',
+    losses: 'losses',
+    pushes: 'pushes',
+    blackjacks: 'blackjacks',
+    bestWinStreak: 'bestWinStreak',
+    bestLossStreak: 'bestLossStreak',
+    totalBet: 'totalBet',
+    mostDrawnCard: 'mostDrawnCard',
+    fiveCardCharlies: 'fiveCardCharlies'
   };
 
   export type GameScoreScalarFieldEnum = (typeof GameScoreScalarFieldEnum)[keyof typeof GameScoreScalarFieldEnum]
@@ -6731,6 +6887,16 @@ export namespace Prisma {
     userId?: StringFilter<"GameScore"> | string
     balance?: IntFilter<"GameScore"> | number
     gameDate?: DateTimeFilter<"GameScore"> | Date | string
+    totalHands?: IntFilter<"GameScore"> | number
+    wins?: IntFilter<"GameScore"> | number
+    losses?: IntFilter<"GameScore"> | number
+    pushes?: IntFilter<"GameScore"> | number
+    blackjacks?: IntFilter<"GameScore"> | number
+    bestWinStreak?: IntFilter<"GameScore"> | number
+    bestLossStreak?: IntFilter<"GameScore"> | number
+    totalBet?: IntFilter<"GameScore"> | number
+    mostDrawnCard?: StringFilter<"GameScore"> | string
+    fiveCardCharlies?: IntFilter<"GameScore"> | number
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
 
@@ -6739,6 +6905,16 @@ export namespace Prisma {
     userId?: SortOrder
     balance?: SortOrder
     gameDate?: SortOrder
+    totalHands?: SortOrder
+    wins?: SortOrder
+    losses?: SortOrder
+    pushes?: SortOrder
+    blackjacks?: SortOrder
+    bestWinStreak?: SortOrder
+    bestLossStreak?: SortOrder
+    totalBet?: SortOrder
+    mostDrawnCard?: SortOrder
+    fiveCardCharlies?: SortOrder
     user?: UserOrderByWithRelationInput
   }
 
@@ -6750,6 +6926,16 @@ export namespace Prisma {
     NOT?: GameScoreWhereInput | GameScoreWhereInput[]
     balance?: IntFilter<"GameScore"> | number
     gameDate?: DateTimeFilter<"GameScore"> | Date | string
+    totalHands?: IntFilter<"GameScore"> | number
+    wins?: IntFilter<"GameScore"> | number
+    losses?: IntFilter<"GameScore"> | number
+    pushes?: IntFilter<"GameScore"> | number
+    blackjacks?: IntFilter<"GameScore"> | number
+    bestWinStreak?: IntFilter<"GameScore"> | number
+    bestLossStreak?: IntFilter<"GameScore"> | number
+    totalBet?: IntFilter<"GameScore"> | number
+    mostDrawnCard?: StringFilter<"GameScore"> | string
+    fiveCardCharlies?: IntFilter<"GameScore"> | number
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id" | "userId">
 
@@ -6758,6 +6944,16 @@ export namespace Prisma {
     userId?: SortOrder
     balance?: SortOrder
     gameDate?: SortOrder
+    totalHands?: SortOrder
+    wins?: SortOrder
+    losses?: SortOrder
+    pushes?: SortOrder
+    blackjacks?: SortOrder
+    bestWinStreak?: SortOrder
+    bestLossStreak?: SortOrder
+    totalBet?: SortOrder
+    mostDrawnCard?: SortOrder
+    fiveCardCharlies?: SortOrder
     _count?: GameScoreCountOrderByAggregateInput
     _avg?: GameScoreAvgOrderByAggregateInput
     _max?: GameScoreMaxOrderByAggregateInput
@@ -6773,6 +6969,16 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"GameScore"> | string
     balance?: IntWithAggregatesFilter<"GameScore"> | number
     gameDate?: DateTimeWithAggregatesFilter<"GameScore"> | Date | string
+    totalHands?: IntWithAggregatesFilter<"GameScore"> | number
+    wins?: IntWithAggregatesFilter<"GameScore"> | number
+    losses?: IntWithAggregatesFilter<"GameScore"> | number
+    pushes?: IntWithAggregatesFilter<"GameScore"> | number
+    blackjacks?: IntWithAggregatesFilter<"GameScore"> | number
+    bestWinStreak?: IntWithAggregatesFilter<"GameScore"> | number
+    bestLossStreak?: IntWithAggregatesFilter<"GameScore"> | number
+    totalBet?: IntWithAggregatesFilter<"GameScore"> | number
+    mostDrawnCard?: StringWithAggregatesFilter<"GameScore"> | string
+    fiveCardCharlies?: IntWithAggregatesFilter<"GameScore"> | number
   }
 
   export type AccountCreateInput = {
@@ -7053,6 +7259,16 @@ export namespace Prisma {
     id?: string
     balance: number
     gameDate?: Date | string
+    totalHands?: number
+    wins?: number
+    losses?: number
+    pushes?: number
+    blackjacks?: number
+    bestWinStreak?: number
+    bestLossStreak?: number
+    totalBet?: number
+    mostDrawnCard?: string
+    fiveCardCharlies?: number
     user: UserCreateNestedOneWithoutGameScoresInput
   }
 
@@ -7061,11 +7277,31 @@ export namespace Prisma {
     userId: string
     balance: number
     gameDate?: Date | string
+    totalHands?: number
+    wins?: number
+    losses?: number
+    pushes?: number
+    blackjacks?: number
+    bestWinStreak?: number
+    bestLossStreak?: number
+    totalBet?: number
+    mostDrawnCard?: string
+    fiveCardCharlies?: number
   }
 
   export type GameScoreUpdateInput = {
     balance?: IntFieldUpdateOperationsInput | number
     gameDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    totalHands?: IntFieldUpdateOperationsInput | number
+    wins?: IntFieldUpdateOperationsInput | number
+    losses?: IntFieldUpdateOperationsInput | number
+    pushes?: IntFieldUpdateOperationsInput | number
+    blackjacks?: IntFieldUpdateOperationsInput | number
+    bestWinStreak?: IntFieldUpdateOperationsInput | number
+    bestLossStreak?: IntFieldUpdateOperationsInput | number
+    totalBet?: IntFieldUpdateOperationsInput | number
+    mostDrawnCard?: StringFieldUpdateOperationsInput | string
+    fiveCardCharlies?: IntFieldUpdateOperationsInput | number
     user?: UserUpdateOneRequiredWithoutGameScoresNestedInput
   }
 
@@ -7073,6 +7309,16 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     balance?: IntFieldUpdateOperationsInput | number
     gameDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    totalHands?: IntFieldUpdateOperationsInput | number
+    wins?: IntFieldUpdateOperationsInput | number
+    losses?: IntFieldUpdateOperationsInput | number
+    pushes?: IntFieldUpdateOperationsInput | number
+    blackjacks?: IntFieldUpdateOperationsInput | number
+    bestWinStreak?: IntFieldUpdateOperationsInput | number
+    bestLossStreak?: IntFieldUpdateOperationsInput | number
+    totalBet?: IntFieldUpdateOperationsInput | number
+    mostDrawnCard?: StringFieldUpdateOperationsInput | string
+    fiveCardCharlies?: IntFieldUpdateOperationsInput | number
   }
 
   export type GameScoreCreateManyInput = {
@@ -7080,17 +7326,47 @@ export namespace Prisma {
     userId: string
     balance: number
     gameDate?: Date | string
+    totalHands?: number
+    wins?: number
+    losses?: number
+    pushes?: number
+    blackjacks?: number
+    bestWinStreak?: number
+    bestLossStreak?: number
+    totalBet?: number
+    mostDrawnCard?: string
+    fiveCardCharlies?: number
   }
 
   export type GameScoreUpdateManyMutationInput = {
     balance?: IntFieldUpdateOperationsInput | number
     gameDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    totalHands?: IntFieldUpdateOperationsInput | number
+    wins?: IntFieldUpdateOperationsInput | number
+    losses?: IntFieldUpdateOperationsInput | number
+    pushes?: IntFieldUpdateOperationsInput | number
+    blackjacks?: IntFieldUpdateOperationsInput | number
+    bestWinStreak?: IntFieldUpdateOperationsInput | number
+    bestLossStreak?: IntFieldUpdateOperationsInput | number
+    totalBet?: IntFieldUpdateOperationsInput | number
+    mostDrawnCard?: StringFieldUpdateOperationsInput | string
+    fiveCardCharlies?: IntFieldUpdateOperationsInput | number
   }
 
   export type GameScoreUncheckedUpdateManyInput = {
     userId?: StringFieldUpdateOperationsInput | string
     balance?: IntFieldUpdateOperationsInput | number
     gameDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    totalHands?: IntFieldUpdateOperationsInput | number
+    wins?: IntFieldUpdateOperationsInput | number
+    losses?: IntFieldUpdateOperationsInput | number
+    pushes?: IntFieldUpdateOperationsInput | number
+    blackjacks?: IntFieldUpdateOperationsInput | number
+    bestWinStreak?: IntFieldUpdateOperationsInput | number
+    bestLossStreak?: IntFieldUpdateOperationsInput | number
+    totalBet?: IntFieldUpdateOperationsInput | number
+    mostDrawnCard?: StringFieldUpdateOperationsInput | string
+    fiveCardCharlies?: IntFieldUpdateOperationsInput | number
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -7431,10 +7707,29 @@ export namespace Prisma {
     userId?: SortOrder
     balance?: SortOrder
     gameDate?: SortOrder
+    totalHands?: SortOrder
+    wins?: SortOrder
+    losses?: SortOrder
+    pushes?: SortOrder
+    blackjacks?: SortOrder
+    bestWinStreak?: SortOrder
+    bestLossStreak?: SortOrder
+    totalBet?: SortOrder
+    mostDrawnCard?: SortOrder
+    fiveCardCharlies?: SortOrder
   }
 
   export type GameScoreAvgOrderByAggregateInput = {
     balance?: SortOrder
+    totalHands?: SortOrder
+    wins?: SortOrder
+    losses?: SortOrder
+    pushes?: SortOrder
+    blackjacks?: SortOrder
+    bestWinStreak?: SortOrder
+    bestLossStreak?: SortOrder
+    totalBet?: SortOrder
+    fiveCardCharlies?: SortOrder
   }
 
   export type GameScoreMaxOrderByAggregateInput = {
@@ -7442,6 +7737,16 @@ export namespace Prisma {
     userId?: SortOrder
     balance?: SortOrder
     gameDate?: SortOrder
+    totalHands?: SortOrder
+    wins?: SortOrder
+    losses?: SortOrder
+    pushes?: SortOrder
+    blackjacks?: SortOrder
+    bestWinStreak?: SortOrder
+    bestLossStreak?: SortOrder
+    totalBet?: SortOrder
+    mostDrawnCard?: SortOrder
+    fiveCardCharlies?: SortOrder
   }
 
   export type GameScoreMinOrderByAggregateInput = {
@@ -7449,10 +7754,29 @@ export namespace Prisma {
     userId?: SortOrder
     balance?: SortOrder
     gameDate?: SortOrder
+    totalHands?: SortOrder
+    wins?: SortOrder
+    losses?: SortOrder
+    pushes?: SortOrder
+    blackjacks?: SortOrder
+    bestWinStreak?: SortOrder
+    bestLossStreak?: SortOrder
+    totalBet?: SortOrder
+    mostDrawnCard?: SortOrder
+    fiveCardCharlies?: SortOrder
   }
 
   export type GameScoreSumOrderByAggregateInput = {
     balance?: SortOrder
+    totalHands?: SortOrder
+    wins?: SortOrder
+    losses?: SortOrder
+    pushes?: SortOrder
+    blackjacks?: SortOrder
+    bestWinStreak?: SortOrder
+    bestLossStreak?: SortOrder
+    totalBet?: SortOrder
+    fiveCardCharlies?: SortOrder
   }
 
   export type IntWithAggregatesFilter<$PrismaModel = never> = {
@@ -8063,12 +8387,32 @@ export namespace Prisma {
     id?: string
     balance: number
     gameDate?: Date | string
+    totalHands?: number
+    wins?: number
+    losses?: number
+    pushes?: number
+    blackjacks?: number
+    bestWinStreak?: number
+    bestLossStreak?: number
+    totalBet?: number
+    mostDrawnCard?: string
+    fiveCardCharlies?: number
   }
 
   export type GameScoreUncheckedCreateWithoutUserInput = {
     id?: string
     balance: number
     gameDate?: Date | string
+    totalHands?: number
+    wins?: number
+    losses?: number
+    pushes?: number
+    blackjacks?: number
+    bestWinStreak?: number
+    bestLossStreak?: number
+    totalBet?: number
+    mostDrawnCard?: string
+    fiveCardCharlies?: number
   }
 
   export type GameScoreCreateOrConnectWithoutUserInput = {
@@ -8164,6 +8508,16 @@ export namespace Prisma {
     userId?: StringFilter<"GameScore"> | string
     balance?: IntFilter<"GameScore"> | number
     gameDate?: DateTimeFilter<"GameScore"> | Date | string
+    totalHands?: IntFilter<"GameScore"> | number
+    wins?: IntFilter<"GameScore"> | number
+    losses?: IntFilter<"GameScore"> | number
+    pushes?: IntFilter<"GameScore"> | number
+    blackjacks?: IntFilter<"GameScore"> | number
+    bestWinStreak?: IntFilter<"GameScore"> | number
+    bestLossStreak?: IntFilter<"GameScore"> | number
+    totalBet?: IntFilter<"GameScore"> | number
+    mostDrawnCard?: StringFilter<"GameScore"> | string
+    fiveCardCharlies?: IntFilter<"GameScore"> | number
   }
 
   export type UserCreateWithoutGameScoresInput = {
@@ -8256,6 +8610,16 @@ export namespace Prisma {
     id?: string
     balance: number
     gameDate?: Date | string
+    totalHands?: number
+    wins?: number
+    losses?: number
+    pushes?: number
+    blackjacks?: number
+    bestWinStreak?: number
+    bestLossStreak?: number
+    totalBet?: number
+    mostDrawnCard?: string
+    fiveCardCharlies?: number
   }
 
   export type AccountUpdateWithoutUserInput = {
@@ -8315,16 +8679,46 @@ export namespace Prisma {
   export type GameScoreUpdateWithoutUserInput = {
     balance?: IntFieldUpdateOperationsInput | number
     gameDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    totalHands?: IntFieldUpdateOperationsInput | number
+    wins?: IntFieldUpdateOperationsInput | number
+    losses?: IntFieldUpdateOperationsInput | number
+    pushes?: IntFieldUpdateOperationsInput | number
+    blackjacks?: IntFieldUpdateOperationsInput | number
+    bestWinStreak?: IntFieldUpdateOperationsInput | number
+    bestLossStreak?: IntFieldUpdateOperationsInput | number
+    totalBet?: IntFieldUpdateOperationsInput | number
+    mostDrawnCard?: StringFieldUpdateOperationsInput | string
+    fiveCardCharlies?: IntFieldUpdateOperationsInput | number
   }
 
   export type GameScoreUncheckedUpdateWithoutUserInput = {
     balance?: IntFieldUpdateOperationsInput | number
     gameDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    totalHands?: IntFieldUpdateOperationsInput | number
+    wins?: IntFieldUpdateOperationsInput | number
+    losses?: IntFieldUpdateOperationsInput | number
+    pushes?: IntFieldUpdateOperationsInput | number
+    blackjacks?: IntFieldUpdateOperationsInput | number
+    bestWinStreak?: IntFieldUpdateOperationsInput | number
+    bestLossStreak?: IntFieldUpdateOperationsInput | number
+    totalBet?: IntFieldUpdateOperationsInput | number
+    mostDrawnCard?: StringFieldUpdateOperationsInput | string
+    fiveCardCharlies?: IntFieldUpdateOperationsInput | number
   }
 
   export type GameScoreUncheckedUpdateManyWithoutUserInput = {
     balance?: IntFieldUpdateOperationsInput | number
     gameDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    totalHands?: IntFieldUpdateOperationsInput | number
+    wins?: IntFieldUpdateOperationsInput | number
+    losses?: IntFieldUpdateOperationsInput | number
+    pushes?: IntFieldUpdateOperationsInput | number
+    blackjacks?: IntFieldUpdateOperationsInput | number
+    bestWinStreak?: IntFieldUpdateOperationsInput | number
+    bestLossStreak?: IntFieldUpdateOperationsInput | number
+    totalBet?: IntFieldUpdateOperationsInput | number
+    mostDrawnCard?: StringFieldUpdateOperationsInput | string
+    fiveCardCharlies?: IntFieldUpdateOperationsInput | number
   }
 
 

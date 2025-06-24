@@ -157,7 +157,17 @@ exports.Prisma.GameScoreScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   balance: 'balance',
-  gameDate: 'gameDate'
+  gameDate: 'gameDate',
+  totalHands: 'totalHands',
+  wins: 'wins',
+  losses: 'losses',
+  pushes: 'pushes',
+  blackjacks: 'blackjacks',
+  bestWinStreak: 'bestWinStreak',
+  bestLossStreak: 'bestLossStreak',
+  totalBet: 'totalBet',
+  mostDrawnCard: 'mostDrawnCard',
+  fiveCardCharlies: 'fiveCardCharlies'
 };
 
 exports.Prisma.SortOrder = {

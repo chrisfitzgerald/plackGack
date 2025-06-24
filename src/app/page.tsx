@@ -17,9 +17,10 @@ type GameMode = 'offline' | 'online';
 interface PlackGackGameProps {
   user?: User | null;
   persistentBalance?: number;
+  persistentStats?: any;
   mode: GameMode;
   onExit: () => void;
-  onSaveBalance?: (balance: number) => void;
+  onSaveBalance?: (balance: number, stats?: any) => void;
   isMobile?: boolean;
 }
 
@@ -89,7 +90,7 @@ function canDoubleDown(hand: { value: string; suit: string }[]) {
   return hand.length === 2 && getHandValue(hand) >= 9 && getHandValue(hand) <= 11;
 }
 
-function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, isMobile }: PlackGackGameProps & { isMobile?: boolean }) {
+function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit, onSaveBalance, isMobile }: PlackGackGameProps & { isMobile?: boolean, persistentStats?: any }) {
   // Game state
   const [deck, setDeck] = useState(createDeck());
   const [playerHands, setPlayerHands] = useState<{ value: string; suit: string }[][]>([]);
@@ -108,6 +109,22 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, i
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const lastSavedBalance = useRef<number>(balance);
+  const [showStats, setShowStats] = useState(false);
+  const [stats, setStats] = useState({
+    totalHands: 0,
+    wins: 0,
+    losses: 0,
+    pushes: 0,
+    blackjacks: 0,
+    currentWinStreak: 0,
+    bestWinStreak: 0,
+    currentLossStreak: 0,
+    bestLossStreak: 0,
+    totalBet: 0,
+    mostDrawnCard: '',
+    cardCounts: {} as Record<string, number>,
+    fiveCardCharlies: 0,
+  });
 
   const playerHand = playerHands[currentHandIndex] || [];
 
@@ -129,13 +146,21 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, i
     fetchLeaderboard();
   }, []);
 
+  // Initialize stats state from persistentStats if provided
+  useEffect(() => {
+    if (mode === 'online' && persistentStats) {
+      setStats((prev) => ({ ...prev, ...persistentStats }));
+    }
+    // eslint-disable-next-line
+  }, [persistentStats, mode]);
+
   // Save balance function with debouncing
   const saveBalance = useCallback((newBalance: number) => {
     if (mode === 'online' && onSaveBalance && newBalance !== lastSavedBalance.current) {
       lastSavedBalance.current = newBalance;
-      onSaveBalance(newBalance);
+      onSaveBalance(newBalance, stats);
     }
-  }, [mode, onSaveBalance]);
+  }, [mode, onSaveBalance, stats]);
 
   // Save balance when game ends
   useEffect(() => {
@@ -418,6 +443,37 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, i
       `Dealer: ${dealerHandStr} (${dealerValue}) | You: ${playerHandsStr} | ${resultMsg.split('\n')[0]}`,
       ...prev.slice(0, 19)
     ]);
+
+    // --- Stats tracking ---
+    // Count blackjacks in this round
+    let blackjacksInRound = 0;
+    let charliesInRound = 0;
+    let cardsDrawn: string[] = [];
+    let handResults: ('win' | 'loss' | 'push')[] = [];
+    playerHands.forEach((hand, idx) => {
+      if (isPlackGack(hand)) blackjacksInRound++;
+      if (hand.length >= 5 && getHandValue(hand) <= 21) charliesInRound++;
+      hand.forEach(card => cardsDrawn.push(card.value));
+      // Determine result for streaks
+      const playerValue = getHandValue(hand);
+      if (playerValue > 21) {
+        handResults.push('loss');
+      } else if (dealerValue > 21 || playerValue > dealerValue) {
+        handResults.push('win');
+      } else if (playerValue < dealerValue) {
+        handResults.push('loss');
+      } else {
+        handResults.push('push');
+      }
+    });
+    updateStats({
+      handResults,
+      betAmount: currentBet * playerHands.length, // crude but works for now
+      playerHands,
+      blackjacksInRound,
+      cardsDrawn,
+      charliesInRound,
+    });
   }
 
   // Save balance when a round completes
@@ -426,6 +482,81 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, i
       saveBalance(balance);
     }
   }, [gamePhase, mode, saveBalance, balance, inRound]);
+
+  // Add a function to update stats after each hand/round
+  function updateStats({
+    handResults,
+    betAmount,
+    playerHands,
+    blackjacksInRound,
+    cardsDrawn,
+    charliesInRound,
+  }: {
+    handResults: ('win' | 'loss' | 'push')[],
+    betAmount: number,
+    playerHands: { value: string; suit: string }[][],
+    blackjacksInRound: number,
+    cardsDrawn: string[],
+    charliesInRound: number,
+  }) {
+    setStats(prev => {
+      // Card counts
+      const cardCounts = { ...prev.cardCounts };
+      for (const card of cardsDrawn) {
+        cardCounts[card] = (cardCounts[card] || 0) + 1;
+      }
+      // Most drawn card
+      let mostDrawnCard = prev.mostDrawnCard;
+      let maxCount = 0;
+      for (const [card, count] of Object.entries(cardCounts)) {
+        if (count > maxCount) {
+          mostDrawnCard = card;
+          maxCount = count;
+        }
+      }
+      // Streaks
+      let currentWinStreak = prev.currentWinStreak;
+      let bestWinStreak = prev.bestWinStreak;
+      let currentLossStreak = prev.currentLossStreak;
+      let bestLossStreak = prev.bestLossStreak;
+      let wins = prev.wins;
+      let losses = prev.losses;
+      let pushes = prev.pushes;
+      for (const result of handResults) {
+        if (result === 'win') {
+          wins++;
+          currentWinStreak++;
+          bestWinStreak = Math.max(bestWinStreak, currentWinStreak);
+          currentLossStreak = 0;
+        } else if (result === 'loss') {
+          losses++;
+          currentLossStreak++;
+          bestLossStreak = Math.max(bestLossStreak, currentLossStreak);
+          currentWinStreak = 0;
+        } else {
+          pushes++;
+          currentWinStreak = 0;
+          currentLossStreak = 0;
+        }
+      }
+      return {
+        ...prev,
+        totalHands: prev.totalHands + handResults.length,
+        wins,
+        losses,
+        pushes,
+        blackjacks: prev.blackjacks + blackjacksInRound,
+        currentWinStreak,
+        bestWinStreak,
+        currentLossStreak,
+        bestLossStreak,
+        totalBet: prev.totalBet + betAmount,
+        mostDrawnCard,
+        cardCounts,
+        fiveCardCharlies: prev.fiveCardCharlies + charliesInRound,
+      };
+    });
+  }
 
   return (
     <div className={styles.gameContainer}>
@@ -441,7 +572,7 @@ function PlackGackGame({ user, persistentBalance, mode, onExit, onSaveBalance, i
       
       <button className={styles.logoutBtn} onClick={() => {
         // Save current state before exiting
-        if (mode === 'online') {
+        if (mode === 'online' && onSaveBalance) {
           saveBalance(balance);
         }
         onExit();
@@ -575,6 +706,32 @@ ${playerHands.length > 1 ? `Hand ${currentHandIndex + 1}: ` : 'You:    '}${handT
           )}
         </div>
       </div>
+
+      {/* Add a button for stats next to leaderboard */}
+      <button className={styles.leaderboardBtn} style={{ left: isMobile ? 'unset' : '10rem', right: isMobile ? '2rem' : 'unset' }}
+        onClick={() => setShowStats(s => !s)}>
+        {isMobile ? (showStats ? 'Hide' : 'Stats') : (showStats ? 'Hide' : 'Show') + ' Stats'}
+      </button>
+
+      {/* Add a sliding stats panel like leaderboard */}
+      <div className={`${styles.leaderboardSlide} ${showStats ? styles.leaderboardSlideOpen : ''}`} style={{ zIndex: 101 }}>
+        <div className={styles.leaderboardSlideHeader}>
+          <h3>📊 Stats</h3>
+          <button className={styles.leaderboardCloseBtn} onClick={() => setShowStats(false)}>×</button>
+        </div>
+        <div className={styles.leaderboardSlideList}>
+          <div className={styles.leaderboardSlideEntry}><span>Total Hands Played:</span><span>{stats.totalHands}</span></div>
+          <div className={styles.leaderboardSlideEntry}><span>Win Rate:</span><span>{stats.totalHands ? ((stats.wins / stats.totalHands) * 100).toFixed(1) + '%' : '0%'}</span></div>
+          <div className={styles.leaderboardSlideEntry}><span>Blackjacks:</span><span>{stats.blackjacks}</span></div>
+          <div className={styles.leaderboardSlideEntry}><span>Current Win Streak:</span><span>{stats.currentWinStreak}</span></div>
+          <div className={styles.leaderboardSlideEntry}><span>Best Win Streak:</span><span>{stats.bestWinStreak}</span></div>
+          <div className={styles.leaderboardSlideEntry}><span>Current Loss Streak:</span><span>{stats.currentLossStreak}</span></div>
+          <div className={styles.leaderboardSlideEntry}><span>Best Loss Streak:</span><span>{stats.bestLossStreak}</span></div>
+          <div className={styles.leaderboardSlideEntry}><span>Average Bet Size:</span><span>{stats.totalHands ? (stats.totalBet / stats.totalHands).toFixed(2) : '0'}</span></div>
+          <div className={styles.leaderboardSlideEntry}><span>Most Drawn Card:</span><span>{stats.mostDrawnCard}</span></div>
+          <div className={styles.leaderboardSlideEntry}><span>5+ Cards w/o Busting:</span><span>{stats.fiveCardCharlies}</span></div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -609,6 +766,7 @@ export default function Home() {
   const [usernameError, setUsernameError] = useState('');
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [persistentStats, setPersistentStats] = useState<any>(null);
 
   useEffect(() => {
     // Function to check if the device is mobile
@@ -646,6 +804,18 @@ export default function Home() {
           if (response.ok) {
             const data = await response.json();
             setUserCurrentBalance(data.currentBalance);
+            setPersistentStats({
+              totalHands: data.totalHands,
+              wins: data.wins,
+              losses: data.losses,
+              pushes: data.pushes,
+              blackjacks: data.blackjacks,
+              bestWinStreak: data.bestWinStreak,
+              bestLossStreak: data.bestLossStreak,
+              totalBet: data.totalBet,
+              mostDrawnCard: data.mostDrawnCard,
+              fiveCardCharlies: data.fiveCardCharlies,
+            });
           }
         } catch (error) {
           console.error('Error fetching user balance:', error);
@@ -675,16 +845,15 @@ export default function Home() {
     }
   }, [session]);
 
-  const handleSaveBalance = async (balance: number) => {
+  const handleSaveBalance = async (balance: number, stats?: any) => {
     if (!session?.user) return;
     
     try {
+      const body = { balance, ...(stats || {}) };
       const response = await fetch('/api/scores', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ balance }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       });
 
       if (response.ok) {
@@ -749,6 +918,7 @@ export default function Home() {
         mode="online" 
         user={session.user as User}
         persistentBalance={userCurrentBalance}
+        persistentStats={persistentStats}
         onExit={() => setOnlineMode(false)}
         onSaveBalance={handleSaveBalance}
         isMobile={isMobile}

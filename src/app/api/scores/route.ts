@@ -41,7 +41,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized - Please sign in again' }, { status: 401 });
     }
 
-    const { balance } = await request.json();
+    const body = await request.json();
+    const { balance, totalHands, wins, losses, pushes, blackjacks, bestWinStreak, bestLossStreak, totalBet, mostDrawnCard, fiveCardCharlies } = body;
 
     if (typeof balance !== 'number') {
       return NextResponse.json({ error: 'Invalid balance' }, { status: 400 });
@@ -57,10 +58,30 @@ export async function POST(request: NextRequest) {
       update: {
         balance,
         gameDate: new Date(),
+        totalHands: totalHands ?? undefined,
+        wins: wins ?? undefined,
+        losses: losses ?? undefined,
+        pushes: pushes ?? undefined,
+        blackjacks: blackjacks ?? undefined,
+        bestWinStreak: bestWinStreak ?? undefined,
+        bestLossStreak: bestLossStreak ?? undefined,
+        totalBet: totalBet ?? undefined,
+        mostDrawnCard: mostDrawnCard ?? undefined,
+        fiveCardCharlies: fiveCardCharlies ?? undefined,
       },
       create: {
         userId: (session.user as any).id,
         balance,
+        totalHands: totalHands ?? 0,
+        wins: wins ?? 0,
+        losses: losses ?? 0,
+        pushes: pushes ?? 0,
+        blackjacks: blackjacks ?? 0,
+        bestWinStreak: bestWinStreak ?? 0,
+        bestLossStreak: bestLossStreak ?? 0,
+        totalBet: totalBet ?? 0,
+        mostDrawnCard: mostDrawnCard ?? '',
+        fiveCardCharlies: fiveCardCharlies ?? 0,
       },
       include: {
         user: {

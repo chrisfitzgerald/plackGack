@@ -65,9 +65,20 @@ model VerificationToken {
 }
 
 model GameScore {
-  id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId   String   @unique @db.ObjectId
-  balance  Int
-  gameDate DateTime @default(now())
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId           String   @unique @db.ObjectId
+  balance          Int
+  gameDate         DateTime @default(now())
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Stats fields
+  totalHands       Int      @default(0)
+  wins             Int      @default(0)
+  losses           Int      @default(0)
+  pushes           Int      @default(0)
+  blackjacks       Int      @default(0)
+  bestWinStreak    Int      @default(0)
+  bestLossStreak   Int      @default(0)
+  totalBet         Int      @default(0)
+  mostDrawnCard    String   @default("")
+  fiveCardCharlies Int      @default(0)
 }

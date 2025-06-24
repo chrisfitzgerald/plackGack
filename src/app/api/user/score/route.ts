@@ -30,7 +30,17 @@ export async function GET() {
 
     const result = { 
       currentBalance: userScore?.balance || 100, // Default to 100 if no previous games
-      user: { username: user?.username }
+      user: { username: user?.username },
+      totalHands: userScore?.totalHands ?? 0,
+      wins: userScore?.wins ?? 0,
+      losses: userScore?.losses ?? 0,
+      pushes: userScore?.pushes ?? 0,
+      blackjacks: userScore?.blackjacks ?? 0,
+      bestWinStreak: userScore?.bestWinStreak ?? 0,
+      bestLossStreak: userScore?.bestLossStreak ?? 0,
+      totalBet: userScore?.totalBet ?? 0,
+      mostDrawnCard: userScore?.mostDrawnCard ?? '',
+      fiveCardCharlies: userScore?.fiveCardCharlies ?? 0,
     };
 
     console.log('User balance fetched:', result);
