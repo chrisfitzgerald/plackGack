@@ -174,7 +174,7 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
     const handleBeforeUnload = () => {
       if (mode === 'online' && onSaveBalance) {
         // Use sendBeacon for reliable saving when page is closing
-        const data = JSON.stringify({ balance });
+        const data = JSON.stringify({ balance, ...stats });
         navigator.sendBeacon('/api/scores', data);
       }
     };
@@ -183,7 +183,7 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
       window.addEventListener('beforeunload', handleBeforeUnload);
       return () => window.removeEventListener('beforeunload', handleBeforeUnload);
     }
-  }, [mode, onSaveBalance, balance]);
+  }, [mode, onSaveBalance, balance, stats]);
 
   // Helper function to check if user has enough funds for actions
   function hasEnoughFundsForAction(action: 'double' | 'split'): boolean {
@@ -573,9 +573,7 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
       </div>
       
       <button className={styles.logoutBtn} onClick={() => {
-        if (mode === 'online') {
-          saveBalance(balance);
-        }
+        saveBalance(balance);
         onExit();
       }}>
         Exit
