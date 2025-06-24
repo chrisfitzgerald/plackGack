@@ -560,24 +560,25 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
 
   return (
     <div className={styles.gameContainer}>
-      <button 
-        className={styles.leaderboardBtn} 
-        onClick={() => {
+      <div style={{ position: 'fixed', top: '2rem', left: '2rem', zIndex: 21, display: 'flex', gap: '1rem' }}>
+        <button className={styles.leaderboardBtn} onClick={() => {
           if (!showLeaderboard) fetchLeaderboard();
           setShowLeaderboard(!showLeaderboard);
-        }}
-      >
-        {isMobile ? (showLeaderboard ? 'Hide' : 'Leaderboard') : (showLeaderboard ? 'Hide' : 'Show') + ' Leaderboard'}
-      </button>
+        }}>
+          Leaderboard
+        </button>
+        <button className={styles.leaderboardBtn} onClick={() => setShowStats(s => !s)}>
+          Stats
+        </button>
+      </div>
       
       <button className={styles.logoutBtn} onClick={() => {
-        // Save current state before exiting
-        if (mode === 'online' && onSaveBalance) {
+        if (mode === 'online') {
           saveBalance(balance);
         }
         onExit();
       }}>
-        {isMobile ? 'Exit' : '[ Exit to Main Menu ]'}
+        Exit
       </button>
 
       {/* Faded game history log */}
@@ -706,12 +707,6 @@ ${playerHands.length > 1 ? `Hand ${currentHandIndex + 1}: ` : 'You:    '}${handT
           )}
         </div>
       </div>
-
-      {/* Add a button for stats next to leaderboard */}
-      <button className={styles.leaderboardBtn} style={{ left: isMobile ? 'unset' : '10rem', right: isMobile ? '2rem' : 'unset' }}
-        onClick={() => setShowStats(s => !s)}>
-        {isMobile ? (showStats ? 'Hide' : 'Stats') : (showStats ? 'Hide' : 'Show') + ' Stats'}
-      </button>
 
       {/* Add a sliding stats panel like leaderboard */}
       <div className={`${styles.leaderboardSlide} ${showStats ? styles.leaderboardSlideOpen : ''}`} style={{ zIndex: 101 }}>
