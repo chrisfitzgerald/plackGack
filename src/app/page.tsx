@@ -232,7 +232,7 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
     // Check for plack gack (blackjack)
     if (isPlackGack(player)) {
       setTimeout(() => {
-        endRound('plackgack');
+        endRound('plackgack', undefined, [player]);
       }, 1000);
     }
   }
@@ -367,19 +367,20 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
     setCurrentHandIndex(currentHandIndex);
   }
 
-  function endRound(reason: 'bust' | 'stand' | 'plackgack', finalDealerHand?: { value: string; suit: string }[]) {
+  function endRound(reason: 'bust' | 'stand' | 'plackgack', finalDealerHand?: { value: string; suit: string }[], overridePlayerHands?: { value: string; suit: string }[][]) {
     setInRound(false);
     setGamePhase('complete');
     setPlayerTurn(false);
     setShowDealer(true);
     
     // --- Stats tracking ---
-    // Count blackjacks in this round
+    // Use overridePlayerHands if provided, otherwise use playerHands
+    const handsForStats = overridePlayerHands || playerHands;
     let blackjacksInRound = 0;
     let charliesInRound = 0;
     let cardsDrawn: string[] = [];
     let handResults: ('win' | 'loss' | 'push')[] = [];
-    playerHands.forEach((hand, idx) => {
+    handsForStats.forEach((hand, idx) => {
       if (isPlackGack(hand)) blackjacksInRound++;
       if (hand.length >= 5 && getHandValue(hand) <= 21) charliesInRound++;
       hand.forEach(card => cardsDrawn.push(card.value));
@@ -397,8 +398,8 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
     });
     updateStats({
       handResults,
-      betAmount: currentBet * playerHands.length, // crude but works for now
-      playerHands,
+      betAmount: currentBet * handsForStats.length, // crude but works for now
+      playerHands: handsForStats,
       blackjacksInRound,
       cardsDrawn,
       charliesInRound,
