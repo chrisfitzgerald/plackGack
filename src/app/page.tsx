@@ -561,13 +561,13 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
   return (
     <div className={styles.gameContainer}>
       <div style={{ position: 'fixed', top: '2rem', left: '2rem', zIndex: 21, display: 'flex', gap: '1rem' }}>
-        <button className={styles.leaderboardBtn} onClick={() => {
+        <button className={styles.leaderboardBtn} style={{ position: 'fixed', top: '2rem', left: '2rem', zIndex: 21 }} onClick={() => {
           if (!showLeaderboard) fetchLeaderboard();
           setShowLeaderboard(!showLeaderboard);
         }}>
           Leaderboard
         </button>
-        <button className={styles.leaderboardBtn} onClick={() => setShowStats(s => !s)}>
+        <button className={styles.leaderboardBtn} style={{ position: 'fixed', top: '2rem', left: '50%', transform: 'translateX(-50%)', zIndex: 21 }} onClick={() => setShowStats(s => !s)}>
           Stats
         </button>
       </div>
