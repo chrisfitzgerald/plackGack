@@ -300,7 +300,8 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
       setMessage('Not enough funds to double down!');
       return;
     }
-    
+    // Deduct the additional bet for double down
+    setBalance(b => b - currentBet);
     const newDeck = [...deck];
     const newHands = [...playerHands];
     newHands[currentHandIndex] = [...newHands[currentHandIndex], newDeck.pop()!];
