@@ -210,12 +210,12 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
       setGameOver(true);
       return;
     }
-    
+
     // Check if deck needs to be reshuffled (when less than 15 cards remain)
     const newDeck = deck.length < 15 ? createDeck() : [...deck];
     const player = [newDeck.pop()!, newDeck.pop()!];
     const dealer = [newDeck.pop()!, newDeck.pop()!];
-    
+
     setDeck(newDeck);
     setPlayerHands([player]);
     setDealerHand(dealer);
@@ -240,10 +240,10 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
   // Player actions
   function hit() {
     if (!inRound || !playerTurn || gamePhase !== 'playing') return;
-    
+
     const newDeck = [...deck];
     const newHands = [...playerHands];
-    
+
     // Ensure we have cards to deal
     if (newDeck.length === 0) {
       setMessage('No cards left in deck! Reshuffling...');
@@ -254,9 +254,9 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
       newHands[currentHandIndex] = [...newHands[currentHandIndex], newDeck.pop()!];
       setDeck(newDeck);
     }
-    
+
     setPlayerHands(newHands);
-    
+
     if (getHandValue(newHands[currentHandIndex]) > 21) {
       if (currentHandIndex < playerHands.length - 1) {
         // Move to next hand
@@ -270,7 +270,7 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
 
   function stand() {
     if (!inRound || !playerTurn || gamePhase !== 'playing') return;
-    
+
     if (currentHandIndex < playerHands.length - 1) {
       // Move to next hand
       setCurrentHandIndex(currentHandIndex + 1);
@@ -279,7 +279,7 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
       setPlayerTurn(false);
       setShowDealer(true);
       setGamePhase('dealer');
-      
+
       // Dealer's turn
       let newDeck = [...deck];
       let newDealerHand = [...dealerHand];
@@ -309,7 +309,7 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
     setPlayerHands(newHands);
     // Don't deduct balance again - it was already deducted in startRound()
     setDoubledDownHands(prev => new Set([...prev, currentHandIndex]));
-    
+
     if (getHandValue(newHands[currentHandIndex]) > 21) {
       if (currentHandIndex < playerHands.length - 1) {
         // Move to next hand
@@ -326,7 +326,7 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
         setPlayerTurn(false);
         setShowDealer(true);
         setGamePhase('dealer');
-        
+
         // Dealer's turn
         let newDeck = [...deck];
         let newDealerHand = [...dealerHand];
@@ -348,19 +348,19 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
       setMessage('Not enough funds to split!');
       return;
     }
-    
+
     const newDeck = [...deck];
     const newHands = [...playerHands];
     const handToSplit = newHands[currentHandIndex];
-    
+
     // Create two new hands
     newHands[currentHandIndex] = [handToSplit[0]];
     newHands.splice(currentHandIndex + 1, 0, [handToSplit[1]]);
-    
+
     // Deal one card to each new hand
     newHands[currentHandIndex].push(newDeck.pop()!);
     newHands[currentHandIndex + 1].push(newDeck.pop()!);
-    
+
     setDeck(newDeck);
     setPlayerHands(newHands);
     // Deduct additional bet for the split hand
@@ -373,7 +373,7 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
     setGamePhase('complete');
     setPlayerTurn(false);
     setShowDealer(true);
-    
+
     // --- Stats tracking ---
     // Use overridePlayerHands if provided, otherwise use playerHands
     const handsForStats = overridePlayerHands || playerHands;
@@ -425,7 +425,7 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
         const betAmount = doubledDownHands.has(index) ? currentBet * 2 : currentBet;
         let handMsg = '';
         let handPayout = 0;
-        
+
         if (playerValue > 21) {
           handMsg = `Hand ${index + 1}: Bust! Lost $${betAmount}`;
           handPayout = 0;
@@ -449,13 +449,13 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
           handMsg = `Hand ${index + 1}: Push! Your $${betAmount} bet returned.`;
           handPayout = betAmount; // Return original bet only
         }
-        
+
         return { handPayout, handMsg };
       });
-      
+
       totalPayout = results.reduce((sum, result) => sum + result.handPayout, 0);
       resultMsg = results.map(r => r.handMsg).join('\n');
-      
+
       // Update balance and check game over status
       setBalance(b => {
         const newBalance = b + totalPayout;
@@ -465,9 +465,9 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
         return newBalance;
       });
     }
-    
+
     setMessage(resultMsg);
-    
+
     // Add to history with correct balance calculation
     const dealerHandStr = handToString(finalDealerHand || dealerHand);
     const playerHandsStr = playerHands.map(hand => handToString(hand)).join(' | ');
@@ -572,7 +572,7 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
           Stats
         </button>
       </div>
-      
+
       <button className={styles.logoutBtn} onClick={() => {
         saveBalance(balance);
         onExit();
@@ -588,31 +588,31 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
           ))}
         </div>
       )}
-      
+
       {/* Dedicated message area with fixed height to prevent layout shifts */}
       <div className={`${styles.gameMessage} ${message ? styles.hasMessage : ''}`}>
         {message || '\n'}
       </div>
-      
+
       <pre className={styles.terminalText}>
         {mode === 'offline'
           ? `${inRound ? '' : '\nPress [Deal] to start a new round.'}`
           : ''}
       </pre>
-      
+
       {(inRound || message) && (
         <pre className={styles.terminalText}>
 {`Dealer: ${showDealer ? handToString(dealerHand) + ' (' + getHandValue(dealerHand) + ')' : dealerHand[0]?.value + dealerHand[0]?.suit + ' ??'}
 ${playerHands.length > 1 ? `Hand ${currentHandIndex + 1}: ` : 'You:    '}${handToString(playerHand)} (${getHandValue(playerHand)})${playerHands.length > 1 ? ` [${playerHands.length} hands]` : ''}${doubledDownHands.has(currentHandIndex) ? ' [DOUBLE]' : ''}`}
         </pre>
       )}
-      
+
       {gameOver && (
         <pre className={styles.terminalText}>
           {`Game over! You ran out of money.`}
         </pre>
       )}
-      
+
       <div className={styles.terminalPrompt}>
         {inRound ? (
           <>
@@ -641,7 +641,7 @@ ${playerHands.length > 1 ? `Hand ${currentHandIndex + 1}: ` : 'You:    '}${handT
           </>
         )}
       </div>
-      
+
       {/* Betting interface */}
       {!inRound && (
         <div className={styles.bettingInterface}>
@@ -673,17 +673,17 @@ ${playerHands.length > 1 ? `Hand ${currentHandIndex + 1}: ` : 'You:    '}${handT
           </div>
         </div>
       )}
-      
+
       {/* Bottom center mode info */}
       <div className={styles.offlineInfo}>
-        [{mode === 'offline' ? 'Offline' : 'Online'} Mode] &nbsp;|&nbsp; Balance: ${balance} &nbsp;|&nbsp; Bet: ${currentBet} &nbsp;|&nbsp; 
+        [{mode === 'offline' ? 'Offline' : 'Online'} Mode] &nbsp;|&nbsp; Balance: ${balance} &nbsp;|&nbsp; Bet: ${currentBet} &nbsp;|&nbsp;
       </div>
 
       {/* Sliding Leaderboard from Bottom */}
       <div className={`${styles.leaderboardSlide} ${showLeaderboard ? styles.leaderboardSlideOpen : ''}`}>
         <div className={styles.leaderboardSlideHeader}>
           <h3>🏆 Leaderboard</h3>
-          <button 
+          <button
             className={styles.leaderboardCloseBtn}
             onClick={() => setShowLeaderboard(false)}
           >
@@ -841,7 +841,7 @@ export default function Home() {
 
   const handleSaveBalance = async (balance: number, stats?: any) => {
     if (!session?.user) return;
-    
+
     try {
       const body = { balance, ...(stats || {}) };
       const response = await fetch('/api/scores', {
@@ -908,8 +908,8 @@ export default function Home() {
 
   if (onlineMode && session?.user) {
     return (
-      <PlackGackGame 
-        mode="online" 
+      <PlackGackGame
+        mode="online"
         user={session.user as User}
         persistentBalance={userCurrentBalance}
         persistentStats={persistentStats}
@@ -944,15 +944,15 @@ export default function Home() {
           >
 {`██████╗ ██╗      █████╗  ██████╗██╗  ██╗     ██████╗  █████╗  ██████╗██╗  ██╗
 ██╔══██╗██║     ██╔══██╗██╔════╝██║ ██╔╝    ██╔════╝ ██╔══██╗██╔════╝██║ ██╔╝
-██████╔╝██║     ███████║██║     █████╔╝     ██║  ███╗███████║██║     █████╔╝ 
-██╔═══╝ ██║     ██╔══██║██║     ██╔═██╗     ██║   ██║██╔══██║██║     ██╔═██╗ 
+██████╔╝██║     ███████║██║     █████╔╝     ██║  ███╗███████║██║     █████╔╝
+██╔═══╝ ██║     ██╔══██║██║     ██╔═██╗     ██║   ██║██╔══██║██║     ██╔═██╗
 ██║     ███████╗██║  ██║╚██████╗██║  ██╗    ╚██████╔╝██║  ██║╚██████╗██║  ██╗
 ╚═╝     ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝     ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
 `}
           </pre>
         )}
       </div>
-      
+
       {session?.user ? (
         <div className={styles.userInfo}>
           <pre className={styles.terminalText}>
@@ -980,7 +980,7 @@ export default function Home() {
           </button>
         </div>
       )}
-      
+
       <div className={styles.terminalInfo}>
         <p>Sign in to start playing and track your balance, or play offline.</p>
       </div>
