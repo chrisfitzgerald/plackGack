@@ -332,12 +332,12 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
         setGamePhase('dealer');
 
         // Dealer's turn
-        let newDeck = [...newDeck];
+        const dealerDeck = [...newDeck];
         let newDealerHand = [...dealerHand];
         while (getHandValue(newDealerHand) < 17) {
-          newDealerHand.push(newDeck.pop()!);
+          newDealerHand.push(dealerDeck.pop()!);
         }
-        setDeck(newDeck);
+        setDeck(dealerDeck);
         setDealerHand(newDealerHand);
         setTimeout(() => {
           endRound('stand', newDealerHand);
