@@ -329,6 +329,10 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
     // Deduct the additional bet for double down
     setBalance(b => b - currentBet);
     const newDeck = [...deck];
+    if (newDeck.length === 0) {
+      setMessage('No cards left in deck! Reshuffling...');
+      newDeck.push(...createDeck());
+    }
     const newHands = [...playerHands];
     newHands[currentHandIndex] = [...newHands[currentHandIndex], newDeck.pop()!];
     setDeck(newDeck);
@@ -353,13 +357,14 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
         setShowDealer(true);
         setGamePhase('dealer');
 
-        // Dealer's turn
-        let newDeck = [...deck];
+        // Dealer's turn — continue from the deck that already has the
+        // double-down card removed (not the stale `deck` state).
+        const dealerDeck = [...newDeck];
         let newDealerHand = [...dealerHand];
         while (getHandValue(newDealerHand) < 17) {
-          newDealerHand.push(newDeck.pop()!);
+          newDealerHand.push(dealerDeck.pop()!);
         }
-        setDeck(newDeck);
+        setDeck(dealerDeck);
         setDealerHand(newDealerHand);
         setTimeout(() => {
           endRound('stand', newDealerHand);
@@ -376,6 +381,10 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
     }
 
     const newDeck = [...deck];
+    if (newDeck.length < 2) {
+      setMessage('No cards left in deck! Reshuffling...');
+      newDeck.push(...createDeck());
+    }
     const newHands = [...playerHands];
     const handToSplit = newHands[currentHandIndex];
 
@@ -444,8 +453,9 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
     } else if (reason === 'bust') {
       resultMsg = 'Bust! You lose your bet.';
     } else {
-      // Calculate results for each hand
-      const results = playerHands.map((hand, index) => {
+      // Calculate results for each hand (use the finalized hands, not stale state)
+      const handsForPayout = overridePlayerHands || playerHands;
+      const results = handsForPayout.map((hand, index) => {
         const playerValue = getHandValue(hand);
         // For double down hands, the bet amount is doubled
         const betAmount = doubledDownHands.has(index) ? currentBet * 2 : currentBet;
@@ -496,7 +506,7 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
 
     // Add to history with correct balance calculation
     const dealerHandStr = handToString(finalDealerHand || dealerHand);
-    const playerHandsStr = playerHands.map(hand => handToString(hand)).join(' | ');
+    const playerHandsStr = handsForStats.map(hand => handToString(hand)).join(' | ');
     setHistory(prev => [
       `Dealer: ${dealerHandStr} (${dealerValue}) | You: ${playerHandsStr} | ${resultMsg.split('\n')[0]}`,
       ...prev.slice(0, 19)
