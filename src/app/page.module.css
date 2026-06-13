@@ -300,7 +300,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 1.1rem;
+  /* Reserve a constant height so switching between the action row and the
+     taller bet panel never resizes the felt and shifts the cards. */
+  min-height: 13.5rem;
   padding: 1.3rem 1.5rem 1.6rem;
   border-top: 1px solid var(--line);
   background: linear-gradient(to top, rgba(12, 15, 12, 0.96), rgba(12, 15, 12, 0.5));
@@ -824,6 +828,6 @@
   .cardCorner { font-size: 0.66rem; }
   .btn { padding: 0.6rem 1.1rem; font-size: 0.78rem; }
   .btnPrimary { padding: 0.65rem 1.8rem; }
-  .dock { padding: 1rem 1rem 1.2rem; }
+  .dock { padding: 1rem 1rem 1.2rem; min-height: 12rem; }
   .chip { min-width: 2.5rem; font-size: 0.72rem; }
 }
