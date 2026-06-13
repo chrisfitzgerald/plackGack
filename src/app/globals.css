@@ -1,21 +1,36 @@
 :root {
-  --background: #181818;
+  --background: #0c0f0c;
   --foreground: #39ff14;
   --terminal-green: #39ff14;
   --terminal-green-glow: #39ff14;
+  --terminal-green-dim: #1c6e10;
   --terminal-red: #ff4136;
   --terminal-red-glow: #ff4136;
-  --terminal-bg: #181818;
+  --terminal-bg: #0c0f0c;
+  --terminal-panel: #11150f;
   --terminal-text: #39ff14;
   --terminal-border: #39ff14;
   --terminal-hover: rgba(57, 255, 20, 0.2);
   --terminal-shadow: rgba(57, 255, 20, 0.4);
   --player-name: #b2ffb2;
+  --font-stack: var(--font-mono), 'Fira Mono', 'Consolas', 'Menlo', monospace;
+
+  /* Short aliases consumed by page.module.css */
+  --g: #39ff14;
+  --g-dim: #1c6e10;
+  --g-soft: #b2ffb2;
+  --r: #ff4136;
+  --bg: #0c0f0c;
+  --panel: #11150f;
+  --line: rgba(57, 255, 20, 0.22);
+  --line-strong: rgba(57, 255, 20, 0.55);
+  --glow: rgba(57, 255, 20, 0.35);
+  --font: var(--font-mono), 'Fira Mono', 'Consolas', monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #181818;
+    --background: #0c0f0c;
     --foreground: #39ff14;
   }
 }
@@ -29,10 +44,37 @@ body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  font-family: var(--font-stack);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-shadow: 0 0 2px var(--terminal-green-glow);
+}
+
+/* CRT atmosphere: scanlines + vignette, sits above the background, below content */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(57, 255, 20, 0.035) 0px,
+      rgba(57, 255, 20, 0.035) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.65) 100%);
+  mix-blend-mode: screen;
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.82; }
+  94% { opacity: 1; }
+  97% { opacity: 0.9; }
 }
 
 * {

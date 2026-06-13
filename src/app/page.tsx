@@ -90,6 +90,32 @@ function canDoubleDown(hand: { value: string; suit: string }[]) {
   return hand.length === 2 && getHandValue(hand) >= 9 && getHandValue(hand) <= 11;
 }
 
+// ---------- Presentational card components ----------
+function PlayingCard({ card, faceDown, index = 0 }: { card?: { value: string; suit: string }; faceDown?: boolean; index?: number }) {
+  const style = { animationDelay: `${index * 0.08}s` } as React.CSSProperties;
+  if (faceDown || !card) {
+    return <div className={`${styles.card} ${styles.cardBack}`} style={style} aria-label="face down card" />;
+  }
+  const isRed = card.suit === '♥' || card.suit === '♦';
+  return (
+    <div className={`${styles.card} ${isRed ? styles.cardRed : ''}`} style={style} aria-label={`${card.value} ${card.suit}`}>
+      <span className={`${styles.cardCorner} ${styles.cardCornerTop}`}>{card.value}<span>{card.suit}</span></span>
+      <span className={styles.cardPip}>{card.suit}</span>
+      <span className={`${styles.cardCorner} ${styles.cardCornerBottom}`}>{card.value}<span>{card.suit}</span></span>
+    </div>
+  );
+}
+
+function CardHand({ hand, hideSecond }: { hand: { value: string; suit: string }[]; hideSecond?: boolean }) {
+  return (
+    <div className={styles.hand}>
+      {hand.map((card, i) => (
+        <PlayingCard key={i} card={card} faceDown={hideSecond && i === 1} index={i} />
+      ))}
+    </div>
+  );
+}
+
 function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit, onSaveBalance, isMobile }: PlackGackGameProps & { isMobile?: boolean, persistentStats?: any }) {
   // Game state
   const [deck, setDeck] = useState(createDeck());
@@ -559,28 +585,11 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
     });
   }
 
+  const hasHands = inRound || playerHands.length > 0;
+
   return (
-    <div className={styles.gameContainer}>
-      <div style={{ position: 'fixed', top: '2rem', left: '2rem', zIndex: 21, display: 'flex', gap: '1rem' }}>
-        <button className={styles.leaderboardBtn} style={{ position: 'fixed', top: '2rem', left: '2rem', zIndex: 21 }} onClick={() => {
-          if (!showLeaderboard) fetchLeaderboard();
-          setShowLeaderboard(!showLeaderboard);
-        }}>
-          Leaderboard
-        </button>
-        <button className={styles.leaderboardBtn} style={{ position: 'fixed', top: '2rem', left: '50%', transform: 'translateX(-50%)', zIndex: 21 }} onClick={() => setShowStats(s => !s)}>
-          Stats
-        </button>
-      </div>
-
-      <button className={styles.logoutBtn} onClick={() => {
-        saveBalance(balance);
-        onExit();
-      }}>
-        Exit
-      </button>
-
-      {/* Faded game history log */}
+    <div className={styles.screen}>
+      {/* Faded game history backdrop (offline) */}
       {mode === 'offline' && history.length > 0 && (
         <div className={styles.gameHistory} aria-hidden="true">
           {history.map((entry, i) => (
@@ -589,141 +598,174 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
         </div>
       )}
 
-      {/* Dedicated message area with fixed height to prevent layout shifts */}
-      <div className={`${styles.gameMessage} ${message ? styles.hasMessage : ''}`}>
-        {message || '\n'}
-      </div>
+      {/* Top bar */}
+      <header className={styles.topBar}>
+        <div className={styles.topGroup}>
+          <button className={styles.navBtn} onClick={() => {
+            if (!showLeaderboard) fetchLeaderboard();
+            setShowLeaderboard(s => !s);
+            setShowStats(false);
+          }}>
+            Leaderboard
+          </button>
+          <button className={styles.navBtn} onClick={() => {
+            setShowStats(s => !s);
+            setShowLeaderboard(false);
+          }}>
+            Stats
+          </button>
+        </div>
+        <span className={styles.brand}>Plack&nbsp;Gack</span>
+        <div className={styles.topGroup}>
+          <button className={`${styles.navBtn} ${styles.navBtnDanger}`} onClick={() => {
+            saveBalance(balance);
+            onExit();
+          }}>
+            Exit
+          </button>
+        </div>
+      </header>
 
-      <pre className={styles.terminalText}>
-        {mode === 'offline'
-          ? `${inRound ? '' : '\nPress [Deal] to start a new round.'}`
-          : ''}
-      </pre>
-
-      {(inRound || message) && (
-        <pre className={styles.terminalText}>
-{`Dealer: ${showDealer ? handToString(dealerHand) + ' (' + getHandValue(dealerHand) + ')' : dealerHand[0]?.value + dealerHand[0]?.suit + ' ??'}
-${playerHands.length > 1 ? `Hand ${currentHandIndex + 1}: ` : 'You:    '}${handToString(playerHand)} (${getHandValue(playerHand)})${playerHands.length > 1 ? ` [${playerHands.length} hands]` : ''}${doubledDownHands.has(currentHandIndex) ? ' [DOUBLE]' : ''}`}
-        </pre>
-      )}
-
-      {gameOver && (
-        <pre className={styles.terminalText}>
-          {`Game over! You ran out of money.`}
-        </pre>
-      )}
-
-      <div className={styles.terminalPrompt}>
-        {inRound ? (
+      {/* Felt / table */}
+      <main className={styles.felt}>
+        {hasHands ? (
           <>
-            <button className={styles.signInBtn} onClick={hit} disabled={!playerTurn || gamePhase !== 'playing'}>
+            {/* Dealer */}
+            <section className={styles.seat}>
+              <div className={styles.seatLabel}>
+                Dealer
+                <span className={styles.valueBadge}>{showDealer ? getHandValue(dealerHand) : '?'}</span>
+              </div>
+              <CardHand hand={dealerHand} hideSecond={!showDealer} />
+            </section>
+
+            {/* Player hand(s) */}
+            <div className={styles.playerHands}>
+              {playerHands.map((hand, idx) => (
+                <section
+                  key={idx}
+                  className={`${styles.seat} ${idx === currentHandIndex && inRound && playerTurn ? styles.activeSeat : ''}`}
+                >
+                  <div className={styles.seatLabel}>
+                    {playerHands.length > 1 ? `Hand ${idx + 1}` : 'You'}
+                    <span className={styles.valueBadge}>{getHandValue(hand)}</span>
+                    {doubledDownHands.has(idx) && <span className={styles.tag}>2×</span>}
+                  </div>
+                  <CardHand hand={hand} />
+                </section>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className={styles.emptyTable}>
+            {gameOver ? 'Out of funds — game over' : 'Place your bet · Deal to begin'}
+          </div>
+        )}
+
+        {/* Message banner */}
+        <div className={`${styles.banner} ${message ? styles.bannerShow : ''}`}>
+          {message}
+        </div>
+      </main>
+
+      {/* Control dock */}
+      <div className={styles.dock}>
+        {inRound ? (
+          <div className={styles.actionRow}>
+            <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={hit} disabled={!playerTurn || gamePhase !== 'playing'}>
               Hit
             </button>
-            <button className={styles.offlineBtn} onClick={stand} disabled={!playerTurn || gamePhase !== 'playing'}>
+            <button className={styles.btn} onClick={stand} disabled={!playerTurn || gamePhase !== 'playing'}>
               Stand
             </button>
             {canDoubleDown(playerHand) && (
-              <button className={styles.offlineBtn} onClick={doubleDown} disabled={!playerTurn || gamePhase !== 'playing' || !hasEnoughFundsForAction('double')}>
+              <button className={`${styles.btn} ${styles.btnGhost}`} onClick={doubleDown} disabled={!playerTurn || gamePhase !== 'playing' || !hasEnoughFundsForAction('double')}>
                 Double
               </button>
             )}
             {canSplit(playerHand) && (
-              <button className={styles.offlineBtn} onClick={split} disabled={!playerTurn || gamePhase !== 'playing' || !hasEnoughFundsForAction('split')}>
+              <button className={`${styles.btn} ${styles.btnGhost}`} onClick={split} disabled={!playerTurn || gamePhase !== 'playing' || !hasEnoughFundsForAction('split')}>
                 Split
               </button>
             )}
-          </>
+          </div>
         ) : (
-          <>
-            <button className={styles.signInBtn} onClick={startRound} disabled={balance < currentBet || gameOver}>
+          <div className={styles.betPanel}>
+            <div className={styles.betDisplay}>
+              <span className={styles.betLabel}>Bet</span>
+              <span className={styles.betValue}>${currentBet}</span>
+            </div>
+            <div className={styles.chipRow}>
+              <button className={styles.chip} onClick={() => adjustBet(-5)} disabled={currentBet <= 5}>−5</button>
+              <button className={styles.chip} onClick={() => adjustBet(-1)} disabled={currentBet <= 5}>−1</button>
+              <button className={`${styles.chip} ${styles.chipPreset}`} onClick={() => setBet(10)} disabled={balance < 10}>$10</button>
+              <button className={`${styles.chip} ${styles.chipPreset}`} onClick={() => setBet(25)} disabled={balance < 25}>$25</button>
+              <button className={`${styles.chip} ${styles.chipPreset}`} onClick={() => setBet(50)} disabled={balance < 50}>$50</button>
+              <button className={styles.chip} onClick={() => adjustBet(1)} disabled={currentBet >= balance}>+1</button>
+              <button className={styles.chip} onClick={() => adjustBet(5)} disabled={currentBet >= balance}>+5</button>
+            </div>
+            <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={startRound} disabled={balance < currentBet || gameOver}>
               Deal
             </button>
-          </>
-        )}
-      </div>
-
-      {/* Betting interface */}
-      {!inRound && (
-        <div className={styles.bettingInterface}>
-          <pre className={styles.terminalText}>
-            {`Current Bet: $${currentBet}`}
-          </pre>
-          <div className={styles.betControls}>
-            <button className={styles.signInBtn} onClick={() => adjustBet(-5)} disabled={currentBet <= 5}>
-              -$5
-            </button>
-            <button className={styles.signInBtn} onClick={() => adjustBet(-1)} disabled={currentBet <= 5}>
-              -$1
-            </button>
-            <button className={styles.signInBtn} onClick={() => setBet(10)} disabled={balance < 10}>
-              $10
-            </button>
-            <button className={styles.signInBtn} onClick={() => setBet(25)} disabled={balance < 25}>
-              $25
-            </button>
-            <button className={styles.signInBtn} onClick={() => setBet(50)} disabled={balance < 50}>
-              $50
-            </button>
-            <button className={styles.signInBtn} onClick={() => adjustBet(1)} disabled={currentBet >= balance}>
-              +$1
-            </button>
-            <button className={styles.signInBtn} onClick={() => adjustBet(5)} disabled={currentBet >= balance}>
-              +$5
-            </button>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Bottom center mode info */}
-      <div className={styles.offlineInfo}>
-        [{mode === 'offline' ? 'Offline' : 'Online'} Mode] &nbsp;|&nbsp; Balance: ${balance} &nbsp;|&nbsp; Bet: ${currentBet} &nbsp;|&nbsp;
+        {/* HUD */}
+        <div className={styles.hud}>
+          <span className={styles.hudItem}>
+            <span className={styles.hudLabel}>{mode === 'offline' ? 'Offline' : 'Online'}</span>
+          </span>
+          <span className={styles.hudDivider}>·</span>
+          <span className={styles.hudItem}>
+            <span className={styles.hudLabel}>Balance</span>
+            <span className={styles.hudValue}>${balance}</span>
+          </span>
+          <span className={styles.hudDivider}>·</span>
+          <span className={styles.hudItem}>
+            <span className={styles.hudLabel}>Bet</span>
+            <span className={styles.hudValue}>${currentBet}</span>
+          </span>
+        </div>
       </div>
 
-      {/* Sliding Leaderboard from Bottom */}
-      <div className={`${styles.leaderboardSlide} ${showLeaderboard ? styles.leaderboardSlideOpen : ''}`}>
-        <div className={styles.leaderboardSlideHeader}>
+      {/* Sliding leaderboard panel */}
+      <div className={`${styles.panel} ${showLeaderboard ? styles.panelOpen : ''}`}>
+        <div className={styles.panelHeader}>
           <h3>🏆 Leaderboard</h3>
-          <button
-            className={styles.leaderboardCloseBtn}
-            onClick={() => setShowLeaderboard(false)}
-          >
-            ×
-          </button>
+          <button className={styles.panelClose} onClick={() => setShowLeaderboard(false)}>×</button>
         </div>
-        <div className={styles.leaderboardSlideList}>
+        <div className={styles.panelBody}>
           {leaderboardData.length > 0 ? (
             leaderboardData.map((entry, index) => (
-              <div key={entry.id} className={styles.leaderboardSlideEntry}>
-                <span className={styles.rank}>#{index + 1}</span>
-                <span className={styles.playerName}>{entry.user.username || entry.user.name}</span>
-                <span className={styles.balance}>${entry.balance}</span>
+              <div key={entry.id} className={styles.row}>
+                <span className={styles.lrRank}>#{index + 1}</span>
+                <span className={styles.lrName}>{entry.user.username || entry.user.name}</span>
+                <span className={styles.lrBalance}>${entry.balance}</span>
               </div>
             ))
           ) : (
-            <div className={styles.leaderboardSlideEntry}>
-              <span>No scores yet</span>
-            </div>
+            <div className={styles.row}><span className={styles.rowKey}>No scores yet</span></div>
           )}
         </div>
       </div>
 
-      {/* Add a sliding stats panel like leaderboard */}
-      <div className={`${styles.leaderboardSlide} ${showStats ? styles.leaderboardSlideOpen : ''}`} style={{ zIndex: 101 }}>
-        <div className={styles.leaderboardSlideHeader}>
+      {/* Sliding stats panel */}
+      <div className={`${styles.panel} ${showStats ? styles.panelOpen : ''}`} style={{ zIndex: 101 }}>
+        <div className={styles.panelHeader}>
           <h3>📊 Stats</h3>
-          <button className={styles.leaderboardCloseBtn} onClick={() => setShowStats(false)}>×</button>
+          <button className={styles.panelClose} onClick={() => setShowStats(false)}>×</button>
         </div>
-        <div className={styles.leaderboardSlideList}>
-          <div className={styles.leaderboardSlideEntry}><span>Total Hands Played:</span><span>{stats.totalHands}</span></div>
-          <div className={styles.leaderboardSlideEntry}><span>Win Rate:</span><span>{stats.totalHands ? ((stats.wins / stats.totalHands) * 100).toFixed(1) + '%' : '0%'}</span></div>
-          <div className={styles.leaderboardSlideEntry}><span>Blackjacks:</span><span>{stats.blackjacks}</span></div>
-          <div className={styles.leaderboardSlideEntry}><span>Current Win Streak:</span><span>{stats.currentWinStreak}</span></div>
-          <div className={styles.leaderboardSlideEntry}><span>Best Win Streak:</span><span>{stats.bestWinStreak}</span></div>
-          <div className={styles.leaderboardSlideEntry}><span>Current Loss Streak:</span><span>{stats.currentLossStreak}</span></div>
-          <div className={styles.leaderboardSlideEntry}><span>Best Loss Streak:</span><span>{stats.bestLossStreak}</span></div>
-          <div className={styles.leaderboardSlideEntry}><span>Average Bet Size:</span><span>{stats.totalHands ? (stats.totalBet / stats.totalHands).toFixed(2) : '0'}</span></div>
-          <div className={styles.leaderboardSlideEntry}><span>Most Drawn Card:</span><span>{stats.mostDrawnCard}</span></div>
-          <div className={styles.leaderboardSlideEntry}><span>5+ Cards w/o Busting:</span><span>{stats.fiveCardCharlies}</span></div>
+        <div className={styles.panelBody}>
+          <div className={styles.row}><span className={styles.rowKey}>Total Hands Played</span><span className={styles.rowVal}>{stats.totalHands}</span></div>
+          <div className={styles.row}><span className={styles.rowKey}>Win Rate</span><span className={styles.rowVal}>{stats.totalHands ? ((stats.wins / stats.totalHands) * 100).toFixed(1) + '%' : '0%'}</span></div>
+          <div className={styles.row}><span className={styles.rowKey}>Blackjacks</span><span className={styles.rowVal}>{stats.blackjacks}</span></div>
+          <div className={styles.row}><span className={styles.rowKey}>Current Win Streak</span><span className={styles.rowVal}>{stats.currentWinStreak}</span></div>
+          <div className={styles.row}><span className={styles.rowKey}>Best Win Streak</span><span className={styles.rowVal}>{stats.bestWinStreak}</span></div>
+          <div className={styles.row}><span className={styles.rowKey}>Current Loss Streak</span><span className={styles.rowVal}>{stats.currentLossStreak}</span></div>
+          <div className={styles.row}><span className={styles.rowKey}>Best Loss Streak</span><span className={styles.rowVal}>{stats.bestLossStreak}</span></div>
+          <div className={styles.row}><span className={styles.rowKey}>Average Bet Size</span><span className={styles.rowVal}>{stats.totalHands ? (stats.totalBet / stats.totalHands).toFixed(2) : '0'}</span></div>
+          <div className={styles.row}><span className={styles.rowKey}>Most Drawn Card</span><span className={styles.rowVal}>{stats.mostDrawnCard || '—'}</span></div>
+          <div className={styles.row}><span className={styles.rowKey}>5+ Cards w/o Busting</span><span className={styles.rowVal}>{stats.fiveCardCharlies}</span></div>
         </div>
       </div>
     </div>
@@ -732,14 +774,14 @@ ${playerHands.length > 1 ? `Hand ${currentHandIndex + 1}: ` : 'You:    '}${handT
 
 function Leaderboard({ entries }: { entries: LeaderboardEntry[] }) {
   return (
-    <div className={styles.leaderboard}>
-      <h2>🏆 Leaderboard</h2>
-      <div className={styles.leaderboardList}>
-        {entries.map((entry, index) => (
-          <div key={entry.id} className={styles.leaderboardEntry}>
-            <span className={styles.rank}>#{index + 1}</span>
-            <span className={styles.playerName}>{entry.user.username || entry.user.name}</span>
-            <span className={styles.balance}>${entry.balance}</span>
+    <div className={styles.leaderCard}>
+      <div className={styles.leaderTitle}>🏆 Top Players</div>
+      <div className={styles.leaderList}>
+        {entries.slice(0, 10).map((entry, index) => (
+          <div key={entry.id} className={styles.leaderRow}>
+            <span className={styles.lrRank}>#{index + 1}</span>
+            <span className={styles.lrName}>{entry.user.username || entry.user.name}</span>
+            <span className={styles.lrBalance}>${entry.balance}</span>
           </div>
         ))}
       </div>
@@ -921,27 +963,20 @@ export default function Home() {
   }
 
   if (status === 'loading' || loading) {
-    return (
-      <div className={styles.terminalBg}>
-        <pre className={styles.terminalText}>Loading...</pre>
-      </div>
-    );
+    return <div className={styles.loading}>Loading…</div>;
   }
 
   return (
-    <div className={styles.terminalBg}>
-      <div className="ascii-art-container" style={{ width: '100vw', maxWidth: '100vw', overflow: 'hidden', justifyContent: 'center', display: 'flex' }}>
+    <div className={styles.landing}>
+      <div className={styles.titleWrap}>
         {isMobile ? (
           <img
             src="/title-mobile.png.png"
-            alt="Game Title"
+            alt="Plack Gack"
             style={{ maxWidth: '100vw', width: '100%', height: 'auto', display: 'block', margin: '0 auto' }}
           />
         ) : (
-          <pre
-            className={styles.terminalText}
-            style={{ fontSize: 'clamp(0.7rem, 2vw, 1.1rem)', width: '100%', overflowX: 'auto', textAlign: 'center', margin: 0 }}
-          >
+          <pre className={styles.asciiTitle}>
 {`██████╗ ██╗      █████╗  ██████╗██╗  ██╗     ██████╗  █████╗  ██████╗██╗  ██╗
 ██╔══██╗██║     ██╔══██╗██╔════╝██║ ██╔╝    ██╔════╝ ██╔══██╗██╔════╝██║ ██╔╝
 ██████╔╝██║     ███████║██║     █████╔╝     ██║  ███╗███████║██║     █████╔╝
@@ -953,37 +988,41 @@ export default function Home() {
         )}
       </div>
 
+      <div className={styles.tagline}>Hit 21 · Top the board</div>
+
       {session?.user ? (
-        <div className={styles.userInfo}>
-          <pre className={styles.terminalText}>
-            {`Welcome back, ${session.user.name}!\nCurrent Balance: $${userCurrentBalance}`}
-          </pre>
-          <div className={styles.terminalPrompt}>
-            <button className={styles.signInBtn} onClick={() => setOnlineMode(true)}>
+        <>
+          <div className={styles.welcome}>
+            Welcome back, <strong>{session.user.name}</strong><br />
+            Balance: <strong>${userCurrentBalance}</strong>
+          </div>
+          <div className={styles.landingActions}>
+            <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setOnlineMode(true)}>
               Play Online
             </button>
-            <button className={styles.offlineBtn} onClick={() => setOfflineMode(true)}>
+            <button className={`${styles.btn} ${styles.btnGhost}`} onClick={() => setOfflineMode(true)}>
               Play Offline
             </button>
-            <button className={styles.offlineBtn} onClick={handleSignOut}>
+            <button className={`${styles.btn} ${styles.btnGhost}`} onClick={handleSignOut}>
               Sign Out
             </button>
           </div>
-        </div>
+        </>
       ) : (
-        <div className={styles.terminalPrompt}>
-          <button className={styles.signInBtn} onClick={handleSignIn}>
-            Sign in with Google
-          </button>
-          <button className={styles.offlineBtn} onClick={() => setOfflineMode(true)}>
-            Play Offline
-          </button>
-        </div>
+        <>
+          <div className={styles.landingActions}>
+            <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={handleSignIn}>
+              Sign in with Google
+            </button>
+            <button className={`${styles.btn} ${styles.btnGhost}`} onClick={() => setOfflineMode(true)}>
+              Play Offline
+            </button>
+          </div>
+          <p className={styles.landingHint}>
+            Sign in to track your balance and climb the leaderboard, or jump straight into offline play.
+          </p>
+        </>
       )}
-
-      <div className={styles.terminalInfo}>
-        <p>Sign in to start playing and track your balance, or play offline.</p>
-      </div>
 
       {leaderboard.length > 0 && (
         <Leaderboard entries={leaderboard} />
@@ -991,22 +1030,21 @@ export default function Home() {
 
       {/* Username Modal */}
       {showUsernameModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', color: '#39ff14', fontFamily: 'Fira Mono, Consolas, Menlo, monospace',
-        }}>
-          <form onSubmit={handleUsernameSubmit} style={{ background: '#222', padding: 32, borderRadius: 12, boxShadow: '0 0 16px #39ff14', minWidth: 300, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <h2 style={{ marginBottom: 16 }}>Choose a Username</h2>
+        <div className={styles.modalOverlay}>
+          <form className={styles.modalCard} onSubmit={handleUsernameSubmit}>
+            <h2 className={styles.modalTitle}>Choose a Username</h2>
             <input
               type="text"
+              className={styles.modalInput}
               value={usernameInput}
               onChange={e => setUsernameInput(e.target.value)}
-              style={{ padding: 8, fontSize: 18, borderRadius: 6, border: '1px solid #39ff14', marginBottom: 12, width: '100%' }}
+              placeholder="at least 3 characters"
               disabled={checkingUsername}
               autoFocus
             />
-            {usernameError && <div style={{ color: '#ff3939', marginBottom: 8 }}>{usernameError}</div>}
-            <button type="submit" style={{ background: '#39ff14', color: '#222', fontWeight: 'bold', border: 'none', borderRadius: 6, padding: '8px 24px', fontSize: 18, cursor: 'pointer' }} disabled={checkingUsername}>
-              {checkingUsername ? 'Checking...' : 'Set Username'}
+            {usernameError && <div className={styles.modalError}>{usernameError}</div>}
+            <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`} disabled={checkingUsername}>
+              {checkingUsername ? 'Checking…' : 'Set Username'}
             </button>
           </form>
         </div>
