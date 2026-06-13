@@ -431,6 +431,15 @@
   color: var(--g);
 }
 
+.gameOverNote {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--r);
+  text-shadow: 0 0 10px rgba(255, 65, 54, 0.4);
+}
+
 /* ===== Bottom HUD ===== */
 .hud {
   display: flex;

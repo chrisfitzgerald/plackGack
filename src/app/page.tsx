@@ -228,6 +228,21 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
     }
   }
 
+  // Restart an offline game after going broke.
+  function newGame() {
+    setBalance(100);
+    setCurrentBet(10);
+    setPlayerHands([]);
+    setDealerHand([]);
+    setDeck(createDeck());
+    setMessage('');
+    setGameOver(false);
+    setInRound(false);
+    setGamePhase('betting');
+    setShowDealer(false);
+    setDoubledDownHands(new Set());
+  }
+
   // Start a new round
   function startRound() {
     if (balance < currentBet) {
@@ -258,8 +273,48 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
     // Check for plack gack (blackjack)
     if (isPlackGack(player)) {
       setTimeout(() => {
-        endRound('plackgack', undefined, [player]);
+        endRound('plackgack', dealer, [player]);
       }, 1000);
+    }
+  }
+
+  // Play out the dealer's hand from the given deck, then resolve the round.
+  // Pass the finalized hands and doubled-down set explicitly so the scheduled
+  // endRound doesn't read stale closure state from this render.
+  function runDealerTurn(
+    sourceDeck: { value: string; suit: string }[],
+    finalHands: { value: string; suit: string }[][],
+    doubledHands: Set<number>
+  ) {
+    setPlayerTurn(false);
+    setShowDealer(true);
+    setGamePhase('dealer');
+
+    const dealerDeck = [...sourceDeck];
+    const newDealerHand = [...dealerHand];
+    while (getHandValue(newDealerHand) < 17) {
+      if (dealerDeck.length === 0) dealerDeck.push(...createDeck());
+      newDealerHand.push(dealerDeck.pop()!);
+    }
+    setDeck(dealerDeck);
+    setDealerHand(newDealerHand);
+    setTimeout(() => {
+      endRound('stand', newDealerHand, finalHands, doubledHands);
+    }, 500);
+  }
+
+  // Called when the final hand busts. A single hand is an immediate loss; with
+  // split hands the dealer still plays so the other (non-busted) hands resolve
+  // fairly instead of the whole round being scored as a bust.
+  function finishOnBust(
+    sourceDeck: { value: string; suit: string }[],
+    finalHands: { value: string; suit: string }[][],
+    doubledHands: Set<number>
+  ) {
+    if (finalHands.length === 1) {
+      endRound('bust', undefined, finalHands, doubledHands);
+    } else {
+      runDealerTurn(sourceDeck, finalHands, doubledHands);
     }
   }
 
@@ -268,19 +323,13 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
     if (!inRound || !playerTurn || gamePhase !== 'playing') return;
 
     const newDeck = [...deck];
-    const newHands = [...playerHands];
-
-    // Ensure we have cards to deal
     if (newDeck.length === 0) {
       setMessage('No cards left in deck! Reshuffling...');
-      const reshuffledDeck = createDeck();
-      newHands[currentHandIndex] = [...newHands[currentHandIndex], reshuffledDeck.pop()!];
-      setDeck(reshuffledDeck);
-    } else {
-      newHands[currentHandIndex] = [...newHands[currentHandIndex], newDeck.pop()!];
-      setDeck(newDeck);
+      newDeck.push(...createDeck());
     }
-
+    const newHands = [...playerHands];
+    newHands[currentHandIndex] = [...newHands[currentHandIndex], newDeck.pop()!];
+    setDeck(newDeck);
     setPlayerHands(newHands);
 
     if (getHandValue(newHands[currentHandIndex]) > 21) {
@@ -288,8 +337,7 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
         // Move to next hand
         setCurrentHandIndex(currentHandIndex + 1);
       } else {
-        // All hands are done
-        endRound('bust');
+        finishOnBust(newDeck, newHands, doubledDownHands);
       }
     }
   }
@@ -302,21 +350,7 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
       setCurrentHandIndex(currentHandIndex + 1);
     } else {
       // All hands are done, dealer's turn
-      setPlayerTurn(false);
-      setShowDealer(true);
-      setGamePhase('dealer');
-
-      // Dealer's turn
-      let newDeck = [...deck];
-      let newDealerHand = [...dealerHand];
-      while (getHandValue(newDealerHand) < 17) {
-        newDealerHand.push(newDeck.pop()!);
-      }
-      setDeck(newDeck);
-      setDealerHand(newDealerHand);
-      setTimeout(() => {
-        endRound('stand', newDealerHand);
-      }, 500);
+      runDealerTurn([...deck], playerHands, doubledDownHands);
     }
   }
 
@@ -337,38 +371,25 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
     newHands[currentHandIndex] = [...newHands[currentHandIndex], newDeck.pop()!];
     setDeck(newDeck);
     setPlayerHands(newHands);
-    // Don't deduct balance again - it was already deducted in startRound()
-    setDoubledDownHands(prev => new Set([...prev, currentHandIndex]));
+    // Track the doubled hand. Pass this updated set explicitly to endRound,
+    // since this state update won't be visible to the endRound closure
+    // scheduled below within the same render.
+    const newDoubled = new Set([...doubledDownHands, currentHandIndex]);
+    setDoubledDownHands(newDoubled);
 
     if (getHandValue(newHands[currentHandIndex]) > 21) {
       if (currentHandIndex < playerHands.length - 1) {
         // Move to next hand
         setCurrentHandIndex(currentHandIndex + 1);
       } else {
-        // All hands are done
-        endRound('bust');
+        finishOnBust(newDeck, newHands, newDoubled);
       }
     } else {
-      // Stand after double down
+      // A double down draws exactly one card, then the hand is done.
       if (currentHandIndex < playerHands.length - 1) {
         setCurrentHandIndex(currentHandIndex + 1);
       } else {
-        setPlayerTurn(false);
-        setShowDealer(true);
-        setGamePhase('dealer');
-
-        // Dealer's turn — continue from the deck that already has the
-        // double-down card removed (not the stale `deck` state).
-        const dealerDeck = [...newDeck];
-        let newDealerHand = [...dealerHand];
-        while (getHandValue(newDealerHand) < 17) {
-          newDealerHand.push(dealerDeck.pop()!);
-        }
-        setDeck(dealerDeck);
-        setDealerHand(newDealerHand);
-        setTimeout(() => {
-          endRound('stand', newDealerHand);
-        }, 500);
+        runDealerTurn(newDeck, newHands, newDoubled);
       }
     }
   }
@@ -403,86 +424,109 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
     setCurrentHandIndex(currentHandIndex);
   }
 
-  function endRound(reason: 'bust' | 'stand' | 'plackgack', finalDealerHand?: { value: string; suit: string }[], overridePlayerHands?: { value: string; suit: string }[][]) {
+  function endRound(
+    reason: 'bust' | 'stand' | 'plackgack',
+    finalDealerHand?: { value: string; suit: string }[],
+    overridePlayerHands?: { value: string; suit: string }[][],
+    overrideDoubled?: Set<number>
+  ) {
     setInRound(false);
     setGamePhase('complete');
     setPlayerTurn(false);
     setShowDealer(true);
 
-    // --- Stats tracking ---
-    // Use overridePlayerHands if provided, otherwise use playerHands
+    // Use the finalized hands / doubled-set when provided, so we never read
+    // stale closure state from the render that scheduled this call.
     const handsForStats = overridePlayerHands || playerHands;
+    const doubled = overrideDoubled || doubledDownHands;
+    const dealerHandFinal = finalDealerHand || dealerHand;
+    const dealerValue = getHandValue(dealerHandFinal);
+    const dealerHasBlackjack = reason === 'plackgack' && isPlackGack(dealerHandFinal);
+    const isSplit = handsForStats.length > 1;
+
+    // --- Stats tracking ---
     let blackjacksInRound = 0;
     let charliesInRound = 0;
-    let cardsDrawn: string[] = [];
-    let handResults: ('win' | 'loss' | 'push')[] = [];
-    handsForStats.forEach((hand, idx) => {
-      if (isPlackGack(hand)) blackjacksInRound++;
+    const cardsDrawn: string[] = [];
+    const handResults: ('win' | 'loss' | 'push')[] = [];
+    handsForStats.forEach((hand) => {
+      // A 2-card 21 only counts as a blackjack on the opening deal (single
+      // hand), not a 21 assembled across split hands.
+      if (isPlackGack(hand) && !isSplit && !dealerHasBlackjack) blackjacksInRound++;
       if (hand.length >= 5 && getHandValue(hand) <= 21) charliesInRound++;
       hand.forEach(card => cardsDrawn.push(card.value));
       // Determine result for streaks
       const playerValue = getHandValue(hand);
       if (playerValue > 21) {
         handResults.push('loss');
-      } else if ((finalDealerHand ? getHandValue(finalDealerHand) : getHandValue(dealerHand)) > 21 || playerValue > (finalDealerHand ? getHandValue(finalDealerHand) : getHandValue(dealerHand))) {
+      } else if (reason === 'plackgack') {
+        handResults.push(dealerHasBlackjack ? 'push' : 'win');
+      } else if (dealerValue > 21 || playerValue > dealerValue) {
         handResults.push('win');
-      } else if (playerValue < (finalDealerHand ? getHandValue(finalDealerHand) : getHandValue(dealerHand))) {
+      } else if (playerValue < dealerValue) {
         handResults.push('loss');
       } else {
         handResults.push('push');
       }
     });
+    const betForStats = handsForStats.reduce(
+      (sum, _hand, idx) => sum + (doubled.has(idx) ? currentBet * 2 : currentBet),
+      0
+    );
     updateStats({
       handResults,
-      betAmount: currentBet * handsForStats.length, // crude but works for now
+      betAmount: betForStats,
       playerHands: handsForStats,
       blackjacksInRound,
       cardsDrawn,
       charliesInRound,
     });
 
-    const dealerValue = getHandValue(finalDealerHand || dealerHand);
     let resultMsg = '';
     let totalPayout = 0;
     if (reason === 'plackgack') {
-      // Plack Gack (Blackjack) pays 3:2
-      const winnings = Math.floor(currentBet * 1.5);
-      const totalPayout = winnings + currentBet;
-      resultMsg = `Plack Gack! You win $${winnings} + your $${currentBet} bet back = $${totalPayout}!`;
+      if (dealerHasBlackjack) {
+        // Both have a natural blackjack -> push, return the original bet.
+        totalPayout = currentBet;
+        resultMsg = `Push! Both have Plack Gack. Your $${currentBet} bet is returned.`;
+      } else {
+        // Plack Gack (Blackjack) pays 3:2
+        const winnings = Math.floor(currentBet * 1.5);
+        totalPayout = winnings + currentBet;
+        resultMsg = `Plack Gack! You win $${winnings} + your $${currentBet} bet back = $${totalPayout}!`;
+      }
       setBalance(b => b + totalPayout);
     } else if (reason === 'bust') {
       resultMsg = 'Bust! You lose your bet.';
     } else {
-      // Calculate results for each hand (use the finalized hands, not stale state)
-      const handsForPayout = overridePlayerHands || playerHands;
-      const results = handsForPayout.map((hand, index) => {
+      // Calculate results for each finalized hand.
+      const results = handsForStats.map((hand, index) => {
         const playerValue = getHandValue(hand);
-        // For double down hands, the bet amount is doubled
-        const betAmount = doubledDownHands.has(index) ? currentBet * 2 : currentBet;
+        // Double-down hands staked twice the base bet.
+        const betAmount = doubled.has(index) ? currentBet * 2 : currentBet;
+        const label = isSplit ? `Hand ${index + 1}: ` : '';
         let handMsg = '';
         let handPayout = 0;
 
         if (playerValue > 21) {
-          handMsg = `Hand ${index + 1}: Bust! Lost $${betAmount}`;
+          handMsg = `${label}Bust! Lost $${betAmount}`;
           handPayout = 0;
         } else if (dealerValue > 21) {
           // Dealer busts - 1:1 payout + original bet
           const winnings = betAmount;
-          const totalPayout = winnings + betAmount;
-          handMsg = `Hand ${index + 1}: Dealer busts! You win $${winnings} + your $${betAmount} bet back = $${totalPayout}!`;
-          handPayout = totalPayout;
+          handPayout = winnings + betAmount;
+          handMsg = `${label}Dealer busts! You win $${winnings} + your $${betAmount} bet back = $${handPayout}!`;
         } else if (playerValue > dealerValue) {
           // Player wins - 1:1 payout + original bet
           const winnings = betAmount;
-          const totalPayout = winnings + betAmount;
-          handMsg = `Hand ${index + 1}: You win $${winnings} + your $${betAmount} bet back = $${totalPayout}!`;
-          handPayout = totalPayout;
+          handPayout = winnings + betAmount;
+          handMsg = `${label}You win $${winnings} + your $${betAmount} bet back = $${handPayout}!`;
         } else if (playerValue < dealerValue) {
-          handMsg = `Hand ${index + 1}: Dealer wins. Lost $${betAmount}`;
+          handMsg = `${label}Dealer wins. Lost $${betAmount}`;
           handPayout = 0; // No payout for loss
         } else {
           // Push - return the original bet, no winnings
-          handMsg = `Hand ${index + 1}: Push! Your $${betAmount} bet returned.`;
+          handMsg = `${label}Push! Your $${betAmount} bet returned.`;
           handPayout = betAmount; // Return original bet only
         }
 
@@ -491,21 +535,13 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
 
       totalPayout = results.reduce((sum, result) => sum + result.handPayout, 0);
       resultMsg = results.map(r => r.handMsg).join('\n');
-
-      // Update balance and check game over status
-      setBalance(b => {
-        const newBalance = b + totalPayout;
-        if (newBalance < 5) {
-          setGameOver(true);
-        }
-        return newBalance;
-      });
+      setBalance(b => b + totalPayout);
     }
 
     setMessage(resultMsg);
 
-    // Add to history with correct balance calculation
-    const dealerHandStr = handToString(finalDealerHand || dealerHand);
+    // Add to history
+    const dealerHandStr = handToString(dealerHandFinal);
     const playerHandsStr = handsForStats.map(hand => handToString(hand)).join(' | ');
     setHistory(prev => [
       `Dealer: ${dealerHandStr} (${dealerValue}) | You: ${playerHandsStr} | ${resultMsg.split('\n')[0]}`,
@@ -519,6 +555,18 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
       saveBalance(balance);
     }
   }, [gamePhase, mode, saveBalance, balance, inRound]);
+
+  // After a round resolves, declare game over once the player can no longer
+  // afford the minimum bet; otherwise clamp a now-unaffordable bet down so the
+  // Deal button doesn't get stuck disabled.
+  useEffect(() => {
+    if (gamePhase !== 'complete') return;
+    if (balance < 5) {
+      setGameOver(true);
+    } else if (currentBet > balance) {
+      setCurrentBet(balance);
+    }
+  }, [gamePhase, balance, currentBet]);
 
   // Add a function to update stats after each hand/round
   function updateStats({
@@ -697,6 +745,17 @@ function PlackGackGame({ user, persistentBalance, persistentStats, mode, onExit,
               <button className={`${styles.btn} ${styles.btnGhost}`} onClick={split} disabled={!playerTurn || gamePhase !== 'playing' || !hasEnoughFundsForAction('split')}>
                 Split
               </button>
+            )}
+          </div>
+        ) : gameOver ? (
+          <div className={styles.betPanel}>
+            <div className={styles.gameOverNote}>Game Over — out of funds</div>
+            {mode === 'offline' ? (
+              <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={newGame}>
+                New Game
+              </button>
+            ) : (
+              <span className={styles.betLabel}>Exit to the menu to play again</span>
             )}
           </div>
         ) : (
